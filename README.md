@@ -7,7 +7,7 @@
 
 ## 👥 Team
 
-**Team Name:** It
+**Team Name:** It works on my machine
 
 | Member | Role |
 |--------|------|
