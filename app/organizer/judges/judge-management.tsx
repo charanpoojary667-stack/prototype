@@ -1,42 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { apiBody, apiRequest } from "../../lib/api";
 import styles from "./judges.module.css";
 
 type JudgeStatus = "Active" | "Invited" | "Inactive";
 type Judge = { id: string; name: string; email: string; status: JudgeStatus; completedReviews: number; color: string };
-type ProjectAssignment = { id: number; judgeId: string; project: string; team: string };
+type ProjectAssignment = { id: string; judgeId: string; projectId?: string; project: string; team: string };
+type ProjectOption = { id: string; name: string; team: string };
 type StatusFilter = "All judges" | JudgeStatus;
-
-const initialJudges: Judge[] = [
-  { id: "maya", name: "Maya Patel", email: "maya.patel@northstar.dev", status: "Active", completedReviews: 3, color: "sage" },
-  { id: "oliver", name: "Oliver Grant", email: "oliver@fieldnotes.studio", status: "Active", completedReviews: 3, color: "coral" },
-  { id: "samira", name: "Samira Okafor", email: "samira@commonthread.org", status: "Active", completedReviews: 1, color: "blue" },
-  { id: "theo", name: "Theo Brooks", email: "theo.brooks@hey.com", status: "Invited", completedReviews: 0, color: "gold" },
-  { id: "jules", name: "Jules Park", email: "jules@brightworks.design", status: "Inactive", completedReviews: 1, color: "lilac" },
-];
-
-const initialAssignments: ProjectAssignment[] = [
-  { id: 1, judgeId: "maya", project: "CivicSignal", team: "Pixel Pioneers" },
-  { id: 2, judgeId: "maya", project: "OpenShelf", team: "Good Neighbors" },
-  { id: 3, judgeId: "maya", project: "Lumen", team: "Soft Systems" },
-  { id: 4, judgeId: "maya", project: "Patchwork", team: "Common Thread" },
-  { id: 5, judgeId: "oliver", project: "CivicSignal", team: "Pixel Pioneers" },
-  { id: 6, judgeId: "oliver", project: "Tidepool", team: "Blue Current" },
-  { id: 7, judgeId: "oliver", project: "GoodMeasure", team: "Small Signals" },
-  { id: 8, judgeId: "samira", project: "OpenShelf", team: "Good Neighbors" },
-  { id: 9, judgeId: "samira", project: "Patchwork", team: "Common Thread" },
-  { id: 10, judgeId: "jules", project: "Lumen", team: "Soft Systems" },
-];
-
-const projects = [
-  { name: "CivicSignal", team: "Pixel Pioneers" },
-  { name: "OpenShelf", team: "Good Neighbors" },
-  { name: "Lumen", team: "Soft Systems" },
-  { name: "Patchwork", team: "Common Thread" },
-  { name: "Tidepool", team: "Blue Current" },
-  { name: "GoodMeasure", team: "Small Signals" },
-];
 
 function Icon({ name, size = 16 }: { name: "check" | "close" | "mail" | "plus" | "search" | "spark"; size?: number }) {
   const paths = {
@@ -55,8 +27,9 @@ function initials(name: string) {
 }
 
 export default function JudgeManagement() {
-  const [judges, setJudges] = useState(initialJudges);
-  const [assignments, setAssignments] = useState(initialAssignments);
+  const [judges, setJudges] = useState<Judge[]>([]);
+  const [assignments, setAssignments] = useState<ProjectAssignment[]>([]);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All judges");
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -66,6 +39,12 @@ export default function JudgeManagement() {
   const [assignmentProject, setAssignmentProject] = useState("");
   const [assignmentError, setAssignmentError] = useState("");
   const [inviteClosing, setInviteClosing] = useState(false);
+  useEffect(() => {
+    apiRequest<{ judges: Omit<Judge, "color">[]; assignments: ProjectAssignment[]; projects: ProjectOption[] }>("/api/organizer/judges").then(data => {
+      setJudges(data.judges.map((judge, index) => ({ ...judge, color: (["sage", "coral", "blue", "gold", "lilac"] as const)[index % 5] })));
+      setAssignments(data.assignments); setProjects(data.projects);
+    }).catch(error => setInviteError(error instanceof Error ? error.message : "Judge data could not be loaded."));
+  }, []);
 
   function closeInvite() {
     if (inviteClosing) return;
@@ -84,26 +63,24 @@ export default function JudgeManagement() {
   const completedReviews = judges.reduce((total, judge) => total + judge.completedReviews, 0);
   const activeJudges = judges.filter((judge) => judge.status === "Active").length;
 
-  function inviteJudge(event: FormEvent<HTMLFormElement>) {
+  async function inviteJudge(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
-    if (judges.some((judge) => judge.email.toLowerCase() === email.toLowerCase())) {
-      setInviteError("A judge with this email is already on the list.");
-      return;
-    }
-
-    setJudges((current) => [...current, { id: `judge-${Date.now()}`, name, email, status: "Invited", completedReviews: 0, color: "blue" }]);
-    closeInvite();
-    setInviteError("");
-    setNotice(`Invite recorded for ${name}. This is a local preview; no email was sent.`);
+    if (!projects[0]) { setInviteError("Submit a project before assigning a judge."); return; }
+    try {
+      const result = await apiRequest<{ temporaryPassword?: string }>("/api/judge/assignments", { method: "POST", body: apiBody({ eventId: "demo-event", projectId: projects[0].id, name, email }) });
+      const data = await apiRequest<{ judges: Omit<Judge, "color">[]; assignments: ProjectAssignment[]; projects: ProjectOption[] }>("/api/organizer/judges");
+      setJudges(data.judges.map((judge, index) => ({ ...judge, color: (["sage", "coral", "blue", "gold", "lilac"] as const)[index % 5] }))); setAssignments(data.assignments);
+      closeInvite(); setInviteError(""); setNotice(result.temporaryPassword ? `Judge assigned. Temporary password: ${result.temporaryPassword}` : `${name} assigned as a judge.`);
+    } catch (reason) { setInviteError(reason instanceof Error ? reason.message : "Judge could not be assigned."); }
   }
 
-  function addAssignment(event: FormEvent<HTMLFormElement>) {
+  async function addAssignment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const judge = judges.find((candidate) => candidate.id === assignmentJudge);
-    const project = projects.find((candidate) => candidate.name === assignmentProject);
+    const project = projects.find((candidate) => candidate.id === assignmentProject);
     if (!judge || !project) {
       setAssignmentError("Choose a judge and project to add an assignment.");
       return;
@@ -113,16 +90,16 @@ export default function JudgeManagement() {
       return;
     }
 
-    setAssignments((current) => [...current, { id: Date.now(), judgeId: judge.id, project: project.name, team: project.team }]);
-    setAssignmentJudge("");
-    setAssignmentProject("");
-    setAssignmentError("");
-    setNotice(`${project.name} assigned to ${judge.name}. This change is only in this preview.`);
+    try {
+      await apiRequest("/api/judge/assignments", { method: "POST", body: apiBody({ eventId: "demo-event", projectId: project.id, email: judge.email }) });
+      const data = await apiRequest<{ judges: Omit<Judge, "color">[]; assignments: ProjectAssignment[]; projects: ProjectOption[] }>("/api/organizer/judges");
+      setAssignments(data.assignments); setAssignmentJudge(""); setAssignmentProject(""); setAssignmentError(""); setNotice(`${project.name} assigned to ${judge.name}.`);
+    } catch (reason) { setAssignmentError(reason instanceof Error ? reason.message : "Assignment could not be saved."); }
   }
 
-  function removeAssignment(assignment: ProjectAssignment) {
-    setAssignments((current) => current.filter((item) => item.id !== assignment.id));
-    setNotice(`${assignment.project} was removed from the mock assignments.`);
+  async function removeAssignment(assignment: ProjectAssignment) {
+    try { await apiRequest(`/api/judge/assignments/${assignment.id}`, { method: "DELETE" }); setAssignments((current) => current.filter((item) => item.id !== assignment.id)); setNotice(`${assignment.project} was removed from the event assignment list.`); }
+    catch (reason) { setAssignmentError(reason instanceof Error ? reason.message : "Assignment could not be removed."); }
   }
 
   return <>
@@ -169,19 +146,19 @@ export default function JudgeManagement() {
         <form className={styles.assignmentForm} onSubmit={addAssignment}>
           <div><span className={styles.sectionIndex}>01</span><h3>Assign a project</h3><p>Choose a judge and a project to add a review assignment.</p></div>
           <label><span>Judge</span><select onChange={(event) => setAssignmentJudge(event.target.value)} value={assignmentJudge}><option value="">Select a judge</option>{judges.map((judge) => <option key={judge.id} value={judge.id}>{judge.name} · {judge.status}</option>)}</select></label>
-          <label><span>Project</span><select onChange={(event) => setAssignmentProject(event.target.value)} value={assignmentProject}><option value="">Select a project</option>{projects.map((project) => <option key={project.name} value={project.name}>{project.name} · {project.team}</option>)}</select></label>
+          <label><span>Project</span><select onChange={(event) => setAssignmentProject(event.target.value)} value={assignmentProject}><option value="">Select a project</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name} · {project.team}</option>)}</select></label>
           <button className={styles.assignButton} type="submit"><Icon name="plus" size={15} /> Add assignment</button>
           {assignmentError && <p className={styles.formError} role="alert">{assignmentError}</p>}
         </form>
         <div className={styles.assignmentList}>
-          <div className={styles.assignmentListHeading}><div><p>MANUAL PREVIEW</p><h3>Current assignments</h3></div><span>{assignments.length} total</span></div>
+          <div className={styles.assignmentListHeading}><div><p>LIVE EVENT DATA</p><h3>Current assignments</h3></div><span>{assignments.length} total</span></div>
           {assignments.length > 0 ? <ul>{assignments.map((assignment) => {
             const judge = judges.find((candidate) => candidate.id === assignment.judgeId);
             return <li key={assignment.id}><span className={styles.projectGlyph}>{assignment.project.slice(0, 1)}</span><span className={styles.assignmentProject}><strong>{assignment.project}</strong><small>{assignment.team}</small></span><span className={styles.assignedJudge}><small>JUDGE</small><strong>{judge?.name ?? "Unknown judge"}</strong></span><button aria-label={`Remove ${assignment.project} assignment for ${judge?.name ?? "judge"}`} onClick={() => removeAssignment(assignment)} title="Remove assignment" type="button"><Icon name="close" size={15} /></button></li>;
           })}</ul> : <div className={styles.assignmentEmpty}><p>No assignments yet.</p><span>Add a judge and project above to start.</span></div>}
         </div>
       </div>
-      <p className={styles.previewNote}><span /> Frontend preview only. Invites and assignments are not sent or saved.</p>
+      <p className={styles.previewNote}><span /> Judge accounts and project assignments are saved locally. Share any generated temporary password directly with the judge.</p>
     </section>
 
     {inviteOpen && <div className={`${styles.modalOverlay} modal-overlay${inviteClosing ? " modal-overlay--closing" : ""}`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeInvite(); }}>
@@ -192,7 +169,7 @@ export default function JudgeManagement() {
           <label><span>Email address</span><input autoComplete="email" maxLength={254} name="email" placeholder="alex@example.com" required type="email" /></label>
           {inviteError && <p className={styles.formError} role="alert">{inviteError}</p>}
           <div className={styles.modalActions}><button className={styles.cancelButton} onClick={closeInvite} type="button">Cancel</button><button className={styles.primaryButton} type="submit"><Icon name="mail" size={15} /> Add to roster</button></div>
-          <p className={styles.modalNote}>Preview only. This will not send an email.</p>
+          <p className={styles.modalNote}>A local judge account and project assignment will be created. Share the generated temporary password with the judge.</p>
         </form>
       </section>
     </div>}

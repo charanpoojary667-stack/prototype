@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { apiBody, apiRequest } from "../lib/api";
 import styles from "./login.module.css";
 
 type FormMode = "signin" | "create";
@@ -9,8 +11,10 @@ export default function LoginForm() {
   const [mode, setMode] = useState<FormMode>("signin");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
@@ -22,11 +26,18 @@ export default function LoginForm() {
       return;
     }
 
-    setFeedback(
-      mode === "signin"
-        ? "This sign-in preview is ready. Authentication is not connected yet."
-        : "This account creation preview is ready. No account has been created.",
-    );
+    setPending(true);
+    try {
+      const credentials = { email: String(formData.get("email")), password: String(formData.get("password")) };
+      if (mode === "signin") await apiRequest("/api/auth/login", { method: "POST", body: apiBody(credentials) });
+      else await apiRequest("/api/auth/signup", { method: "POST", body: apiBody({ ...credentials, name: String(formData.get("name") || "") }) });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not connect to HackForge.");
+    } finally {
+      setPending(false);
+    }
   }
 
   function switchMode() {
@@ -43,6 +54,7 @@ export default function LoginForm() {
       </div>
 
       <form className={styles.loginForm} onSubmit={handleSubmit}>
+        {mode === "create" && <label className={styles.fieldGroup}><span>Full name</span><span className={styles.inputWrap}><input autoComplete="name" name="name" placeholder="Your name" required type="text" /></span></label>}
         <label className={styles.fieldGroup}>
           <span>Email address</span>
           <span className={styles.inputWrap}>
@@ -107,8 +119,8 @@ export default function LoginForm() {
           </label>
         )}
 
-        <button className={styles.submitButton} type="submit">
-          {mode === "signin" ? "Sign in" : "Create account"}
+        <button className={styles.submitButton} disabled={pending} type="submit">
+          {pending ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M5 12h14m-6-6 6 6-6 6" />
           </svg>
@@ -125,7 +137,7 @@ export default function LoginForm() {
       </p>
 
       <p className={styles.demoNote}>
-        <span /> Frontend preview only · Account services aren’t connected
+        <span /> Demo: participant@example.com · HackForge26!
       </p>
     </div>
   );

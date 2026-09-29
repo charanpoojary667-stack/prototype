@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getMockProject } from "../project-data";
-import PublicProjectView from "./public-project-view";
+import PublicProjectLoader from "./public-project-loader";
 import styles from "./view.module.css";
 
 type ProjectViewPageProps = {
@@ -11,10 +10,9 @@ type ProjectViewPageProps = {
 
 export async function generateMetadata({ params }: ProjectViewPageProps): Promise<Metadata> {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
   return {
-    title: project ? `${project.name} | HackForge` : "Project not found | HackForge",
-    description: project?.tagline ?? "Explore a HackForge community project.",
+    title: `Project ${projectId} | HackForge`,
+    description: "Explore a submitted HackForge community project.",
   };
 }
 
@@ -90,7 +88,6 @@ function EmptyProjectState() {
 
 export default async function PublicProjectPage({ params }: ProjectViewPageProps) {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
 
   return (
     <div className="app-shell">
@@ -99,9 +96,9 @@ export default async function PublicProjectPage({ params }: ProjectViewPageProps
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> PROJECT SHOWCASE</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-              <span className="profile-avatar">JL</span>
-              <span className="profile-name">Jordan Lee</span>
+            <button className="profile-button" type="button" aria-label="Account menu">
+              <span className="profile-avatar">HF</span>
+              <span className="profile-name">My account</span>
               <span className="profile-chevron">⌄</span>
             </button>
           </div>
@@ -112,7 +109,7 @@ export default async function PublicProjectPage({ params }: ProjectViewPageProps
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12" /></svg>
             Back to Gallery
           </Link>
-          {project ? <PublicProjectView project={project} /> : <EmptyProjectState />}
+          <PublicProjectLoader projectId={projectId} />
           <footer className={styles.viewFooter}>
             <span>HackForge <i /> Built for builders</span>
             <Link href="/events/demo-event">DOGFOOD Hackathon <Icon name="arrow" size={14} /></Link>

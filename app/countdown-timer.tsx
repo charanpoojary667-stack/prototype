@@ -23,35 +23,33 @@ function format(value: number) {
   return String(value).padStart(2, "0");
 }
 
-export default function CountdownTimer({ targetDate }: { targetDate: string }) {
-  const [countdown, setCountdown] = useState<Countdown>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+export default function CountdownTimer({ targetDate, label = "COUNTDOWN TO KICKOFF" }: { targetDate: string; label?: string }) {
+  const [countdown, setCountdown] = useState<Countdown | null>(null);
 
   useEffect(() => {
     const targetTime = new Date(targetDate).getTime();
-    const updateCountdown = () => {
-      setCountdown(getCountdown(Number.isFinite(targetTime) ? targetTime : 0, Date.now()));
-    };
+    const updateCountdown = () => { if (Number.isFinite(targetTime)) setCountdown(getCountdown(targetTime, Date.now())); };
 
     updateCountdown();
     const intervalId = window.setInterval(updateCountdown, second);
     return () => window.clearInterval(intervalId);
   }, [targetDate]);
 
-  const label = `${countdown.days} days, ${countdown.hours} hours, ${countdown.minutes} minutes, and ${countdown.seconds} seconds until kickoff`;
+  const accessibleLabel = countdown ? `${countdown.days} days, ${countdown.hours} hours, ${countdown.minutes} minutes, and ${countdown.seconds} seconds` : "Loading countdown";
 
   return (
-    <div className="event-countdown" aria-label={label}>
-      <p>COUNTDOWN TO KICKOFF</p>
+    <div className="event-countdown" aria-label={accessibleLabel}>
+      <p>{label}</p>
       <div className="countdown-units countdown-units--four" aria-live="off">
-        <div><strong key={countdown.days}>{format(countdown.days)}</strong><span>DAYS</span></div>
+        <div><strong key={countdown?.days}>{countdown ? format(countdown.days) : "--"}</strong><span>DAYS</span></div>
         <i>:</i>
-        <div><strong key={countdown.hours}>{format(countdown.hours)}</strong><span>HRS</span></div>
+        <div><strong key={countdown?.hours}>{countdown ? format(countdown.hours) : "--"}</strong><span>HRS</span></div>
         <i>:</i>
-        <div><strong key={countdown.minutes}>{format(countdown.minutes)}</strong><span>MIN</span></div>
+        <div><strong key={countdown?.minutes}>{countdown ? format(countdown.minutes) : "--"}</strong><span>MIN</span></div>
         <i>:</i>
-        <div><strong key={countdown.seconds}>{format(countdown.seconds)}</strong><span>SEC</span></div>
+        <div><strong key={countdown?.seconds}>{countdown ? format(countdown.seconds) : "--"}</strong><span>SEC</span></div>
       </div>
-      <span className="countdown-note"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Registration closes soon</span>
+      <span className="countdown-note"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Updates every second · event time is UTC</span>
     </div>
   );
 }

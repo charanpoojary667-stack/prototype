@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CopyInviteButton, InviteMemberButton } from "./team-actions";
+import TeamWorkspace from "./team-workspace";
 import styles from "./team.module.css";
 
 export const metadata: Metadata = {
@@ -141,9 +141,9 @@ export default function DemoTeamPage() {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> TEAM SPACE</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-              <span className="profile-avatar">JL</span>
-              <span className="profile-name">Jordan Lee</span>
+            <button className="profile-button" type="button" aria-label="Account menu">
+              <span className="profile-avatar">HF</span>
+              <span className="profile-name">My account</span>
               <span className="profile-chevron">⌄</span>
             </button>
           </div>
@@ -155,55 +155,7 @@ export default function DemoTeamPage() {
             Back to DOGFOOD Hackathon
           </Link>
 
-          <section className={styles.teamHeader} aria-labelledby="team-title">
-            <div>
-              <p className={styles.teamEyebrow}><span /> MY TEAM <i /> DOGFOOD HACKATHON</p>
-              <h1 id="team-title">Pixel Pioneers</h1>
-              <p className={styles.teamDescription}>A small team with a big idea. Building CivicSignal for more connected communities.</p>
-            </div>
-            <InviteMemberButton />
-          </section>
-
-          <section className={styles.teamOverview} aria-label="Team overview">
-            <div className={styles.overviewCopy}>
-              <div className={styles.overviewTitle}><span className={styles.teamMark}>P</span><div><span className={styles.cardEyebrow}>TEAM PROFILE</span><h2>Make good things, together.</h2></div></div>
-              <p>Created September 24, 2026 <i /> Open to new teammates</p>
-            </div>
-            <div className={styles.capacityPanel}>
-              <div className={styles.capacityText}><span>TEAM CAPACITY</span><strong>1 <i>/</i> 4</strong></div>
-              <div className={styles.capacityTrack} role="progressbar" aria-label="Team capacity" aria-valuenow={1} aria-valuemin={0} aria-valuemax={4}><span /></div>
-              <p>3 spots available</p>
-            </div>
-          </section>
-
-          <div className={styles.teamLayout}>
-            <MemberList />
-            <aside className={styles.teamAside}>
-              <section className={styles.invitePanel} id="invite-link" aria-labelledby="invite-title">
-                <div className={styles.inviteHeading}>
-                  <span className={styles.inviteIcon}><Icon name="link" size={18} /></span>
-                  <div><span className={styles.cardEyebrow}>GROW YOUR CREW</span><h2 id="invite-title">Invite a teammate</h2></div>
-                </div>
-                <p>Send this private link to someone you’d like on your team.</p>
-                <label className={styles.inviteLabel} htmlFor="invite-url">TEAM INVITE LINK</label>
-                <input className={styles.inviteInput} id="invite-url" readOnly value="/teams/demo-team?invite=HF26-PIXEL" />
-                <CopyInviteButton />
-                <p className={styles.inviteFootnote}>Anyone with the link can request to join.</p>
-              </section>
-
-              <section className={styles.eventPanel} aria-labelledby="team-event-title">
-                <span className={styles.cardEyebrow}>YOUR EVENT</span>
-                <h2 id="team-event-title">DOGFOOD Hackathon</h2>
-                <p><Icon name="calendar" size={15} /> October 9–11, 2026</p>
-                <Link href="/events/demo-event">View event details <Icon name="arrow" size={14} /></Link>
-              </section>
-
-              <button className={styles.leaveButton} type="button" disabled title="Team management is a frontend preview">
-                Leave team <Icon name="arrow" size={15} />
-              </button>
-              <p className={styles.leaveNote}>Team actions are preview-only.</p>
-            </aside>
-          </div>
+          <TeamWorkspace />
 
           <footer className={styles.teamFooter}>
             <span>HackForge <i /> Built for builders</span>

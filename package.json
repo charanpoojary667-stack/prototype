@@ -2,10 +2,11 @@
   "name": "hackathon-platform",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/run.js dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/run.js start",
     "lint": "eslint"
   },
   "dependencies": {

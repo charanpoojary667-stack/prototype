@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { apiBody, apiRequest } from "../../../../lib/api";
 import styles from "./event-editor.module.css";
 
-type Track = { id: number; name: string; description: string };
+type Track = { id: string | number; name: string; description: string };
 type Prize = { id: number; name: string; amount: string; description: string };
 
 function Icon({ name, size = 15 }: { name: "calendar" | "check" | "close" | "people" | "plus"; size?: number }) {
@@ -36,11 +37,21 @@ export default function EventEditor() {
   const [feedback, setFeedback] = useState("");
   const [feedbackKind, setFeedbackKind] = useState<"success" | "error">("success");
   const [pending, setPending] = useState(false);
+  useEffect(() => {
+    apiRequest<{ event: { title: string; description: string; status: string; registrationStartAt: string; registrationEndAt: string; startAt: string; endAt: string; submissionDeadline: string; tracks: { id: string; name: string; description: string }[]; prizes: { name: string; value?: string; amount?: string; description?: string }[] } }>("/api/events/demo-event")
+      .then(({ event }) => {
+        setEventName(event.title); setDescription(event.description); setStatus(event.status === "published" ? "Published" : "Draft");
+        setRegistrationStart(event.registrationStartAt.slice(0, 10)); setRegistrationEnd(event.registrationEndAt.slice(0, 10)); setHackathonStart(event.startAt.slice(0, 10)); setHackathonEnd(event.endAt.slice(0, 10));
+        setDeadline(new Date(event.submissionDeadline).toISOString().slice(0, 16));
+        if (event.tracks?.length) setTracks(event.tracks.map(track => ({ ...track })));
+        if (event.prizes?.length) setPrizes(event.prizes.map((prize, index) => ({ id: index + 1, name: prize.name, amount: prize.amount || prize.value || "", description: prize.description || "" })));
+      }).catch(error => setFeedback(error instanceof Error ? error.message : "Event data could not be loaded."));
+  }, []);
 
-  function updateTrack(id: number, field: "name" | "description", value: string) { setTracks((current) => current.map((track) => track.id === id ? { ...track, [field]: value } : track)); }
+  function updateTrack(id: string | number, field: "name" | "description", value: string) { setTracks((current) => current.map((track) => track.id === id ? { ...track, [field]: value } : track)); }
   function updatePrize(id: number, field: "name" | "amount" | "description", value: string) { setPrizes((current) => current.map((prize) => prize.id === id ? { ...prize, [field]: value } : prize)); }
   function addTrack() { setTracks((current) => [...current, { id: Date.now(), name: "New track", description: "Describe what belongs in this track." }]); }
-  function removeTrack(id: number) { setTracks((current) => current.filter((track) => track.id !== id)); }
+  function removeTrack(id: string | number) { setTracks((current) => current.filter((track) => track.id !== id)); }
   function addPrize() { setPrizes((current) => [...current, { id: Date.now(), name: "New prize", amount: "$0", description: "Add a short description." }]); }
   function removePrize(id: number) { setPrizes((current) => current.filter((prize) => prize.id !== id)); }
 
@@ -53,8 +64,12 @@ export default function EventEditor() {
       setFeedback("Check the event dates. Each range must be in order and the deadline cannot be before the event ends."); setFeedbackKind("error"); return;
     }
     setPending(true); setFeedback("");
-    await new Promise((resolve) => window.setTimeout(resolve, 450));
-    setPending(false); setFeedback("Changes saved in this preview. Nothing was sent or stored."); setFeedbackKind("success");
+    try {
+      const isoDate = (value: string, end = false) => new Date(`${value}${end ? "T23:59:00Z" : "T00:00:00Z"}`).toISOString();
+      await apiRequest("/api/events/demo-event", { method: "PATCH", body: apiBody({ title: eventName, description, registrationStartAt: isoDate(registrationStart), registrationEndAt: isoDate(registrationEnd, true), startAt: isoDate(hackathonStart), endAt: isoDate(hackathonEnd, true), submissionDeadline: new Date(deadline).toISOString(), tracks, prizes: prizes.map(prize => ({ name: prize.name, value: prize.amount, description: prize.description })) }) });
+      setFeedback("Event changes saved."); setFeedbackKind("success");
+    } catch (error) { setFeedback(error instanceof Error ? error.message : "Event changes could not be saved."); setFeedbackKind("error"); }
+    finally { setPending(false); }
   }
 
   const feedbackClass = feedbackKind === "error" ? styles.feedbackError : styles.feedbackSuccess;
@@ -63,7 +78,7 @@ export default function EventEditor() {
   return <form className={styles.editorLayout} noValidate onSubmit={saveChanges}>
     <div className={styles.formColumn}>
       <header className={styles.pageHeader}><div><p className={styles.eyebrow}><span /> DOGFOOD HACKATHON <i /> EVENT MANAGEMENT</p><h1>Manage your event.</h1><p>Keep the event details clear, current, and ready for builders.</p></div><span className={`${styles.statusBadge} ${status === "Published" ? styles.published : ""}`}><i /> {status}</span></header>
-      <section className={styles.formSection} aria-labelledby="basics-title"><div className={styles.sectionHeading}><span>01</span><div><p>THE EVENT</p><h2 id="basics-title">Event basics</h2></div></div><div className={styles.fieldsGrid}><label className={styles.fieldWide}><span>Event name</span><input maxLength={80} onChange={(event) => setEventName(event.target.value)} value={eventName} /></label><label><span>Event status</span><select onChange={(event) => setStatus(event.target.value)} value={status}><option>Draft</option><option>Published</option></select></label><label className={styles.fieldWide}><span>Description</span><textarea maxLength={500} onChange={(event) => setDescription(event.target.value)} rows={4} value={description} /><small>{description.length}/500 characters</small></label></div></section>
+      <section className={styles.formSection} aria-labelledby="basics-title"><div className={styles.sectionHeading}><span>01</span><div><p>THE EVENT</p><h2 id="basics-title">Event basics</h2></div></div><div className={styles.fieldsGrid}><label className={styles.fieldWide}><span>Event name</span><input maxLength={80} onChange={(event) => setEventName(event.target.value)} value={eventName} /></label><label><span>Event status</span><input readOnly value={status} /></label><label className={styles.fieldWide}><span>Description</span><textarea maxLength={500} onChange={(event) => setDescription(event.target.value)} rows={4} value={description} /><small>{description.length}/500 characters</small></label></div></section>
       <section className={styles.formSection} aria-labelledby="dates-title"><div className={styles.sectionHeading}><span>02</span><div><p>MARK THE CALENDAR</p><h2 id="dates-title">Event dates</h2></div></div><div className={styles.fieldsGrid}><label><span>Registration starts</span><input onChange={(event) => setRegistrationStart(event.target.value)} type="date" value={registrationStart} /></label><label><span>Registration ends</span><input onChange={(event) => setRegistrationEnd(event.target.value)} type="date" value={registrationEnd} /></label><label><span>Hackathon starts</span><input onChange={(event) => setHackathonStart(event.target.value)} type="date" value={hackathonStart} /></label><label><span>Hackathon ends</span><input onChange={(event) => setHackathonEnd(event.target.value)} type="date" value={hackathonEnd} /></label><label className={styles.fieldWide}><span>Submission deadline</span><input onChange={(event) => setDeadline(event.target.value)} type="datetime-local" value={deadline} /></label></div></section>
       <section className={styles.formSection} aria-labelledby="tracks-title">
         <div className={styles.sectionHeading}><span>03</span><div><p>MAKE A LANE</p><h2 id="tracks-title">Tracks</h2></div><button className={styles.addButton} onClick={addTrack} type="button"><Icon name="plus" size={14} /> Add track</button></div>
@@ -111,7 +126,7 @@ export default function EventEditor() {
         <div className={styles.previewArtwork}><span>D</span><small>FALL 2026</small></div>
         <h2>{eventName || "Your event name"}</h2>
         <p>{description || "Your event description will appear here."}</p>
-        <div className={styles.previewMeta}><span><Icon name="calendar" size={13} /> Oct 9–11, 2026</span><span><Icon name="people" size={13} /> 248 builders</span></div>
+        <div className={styles.previewMeta}><span><Icon name="calendar" size={13} /> {hackathonStart}–{hackathonEnd}</span><span><Icon name="people" size={13} /> HackForge event</span></div>
       </section>
       <section className={styles.previewCard}>
         <p className={styles.sectionEyebrow}>PUBLISHED TRACKS</p>
@@ -120,7 +135,7 @@ export default function EventEditor() {
         </div>
         <div className={styles.previewPrizes}><strong>{prizes.length}</strong><span>prizes configured</span></div>
       </section>
-      <p className={styles.previewNote}><span /> Frontend preview only. Organizer services are not connected.</p>
+      <p className={styles.previewNote}><span /> The event values above are saved to your local HackForge database.</p>
     </aside>
   </form>;
 }

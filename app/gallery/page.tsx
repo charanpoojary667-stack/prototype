@@ -80,9 +80,9 @@ export default function GalleryPage() {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> COMMUNITY GALLERY</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-              <span className="profile-avatar">JL</span>
-              <span className="profile-name">Jordan Lee</span>
+            <button className="profile-button" type="button" aria-label="Account menu">
+              <span className="profile-avatar">HF</span>
+              <span className="profile-name">My account</span>
               <span className="profile-chevron">⌄</span>
             </button>
           </div>

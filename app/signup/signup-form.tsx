@@ -2,13 +2,17 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { apiBody, apiRequest } from "../lib/api";
 import styles from "../login/login.module.css";
 
 export default function SignupForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
@@ -17,7 +21,16 @@ export default function SignupForm() {
       return;
     }
 
-    setFeedback("Your signup preview is ready. No account has been created.");
+    setPending(true);
+    try {
+      await apiRequest("/api/auth/signup", { method: "POST", body: apiBody({ name: String(formData.get("name")), email: String(formData.get("email")), password: String(formData.get("password")) }) });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not connect to HackForge.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -108,8 +121,8 @@ export default function SignupForm() {
           </span>
         </label>
 
-        <button className={styles.submitButton} type="submit">
-          Create account
+        <button className={styles.submitButton} disabled={pending} type="submit">
+          {pending ? "Please wait…" : "Create account"}
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M5 12h14m-6-6 6 6-6 6" />
           </svg>
@@ -123,7 +136,7 @@ export default function SignupForm() {
       </p>
 
       <p className={styles.demoNote}>
-        <span /> Frontend preview only · Account services aren’t connected
+        <span /> Your account is stored on this HackForge server.
       </p>
     </div>
   );

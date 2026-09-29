@@ -81,21 +81,23 @@ try {
   await request(`/events/${eventId}/tracks/${track.track.id}/judges`, 'POST', organizer.token, { email: `judge-${suffix}@example.test` }, 201);
   await request(`/events/${eventId}/publish`, 'POST', organizer.token, {});
 
+  await request(`/events/${eventId}/register`, 'POST', participant.token, {}, 201);
   const team = await request('/teams', 'POST', participant.token, { eventId, name: 'Workflow Team' }, 201);
   const submission = await request(`/teams/${team.team.id}/submissions`, 'POST', participant.token, { trackId: track.track.id, title: 'Workflow Project', summary: 'A project created by the automated full workflow check.', repositoryUrl: 'https://example.test/repository' }, 201);
   let assigned = await request(`/events/${eventId}/judging-assignments`, 'GET', judge.token);
-  assert.equal(assigned.assignments.length, 1, 'track eligibility should exclude the other event judge');
+  assert.equal(assigned.assignments.length, 1, `track eligibility should exclude the other event judge: ${JSON.stringify(assigned.assignments)}`);
   await request(`/judging-assignments/${assigned.assignments[0].id}`, 'PATCH', judge.token, { status: 'in_progress' });
-  await request(`/submissions/${submission.submission.id}/scores`, 'PUT', judge.token, { scores: track.track.rubric.map((criterion, index) => ({ criterionId: criterion.id, score: [8, 9, 7][index], feedback: 'Verified by workflow check.' })) });
+  await request(`/submissions/${submission.submission.id}/scores`, 'PUT', judge.token, { final: true, scores: track.track.rubric.map((criterion, index) => ({ criterionId: criterion.id, score: [8, 9, 7][index], feedback: 'Verified by workflow check.' })) });
   const recorded = await request(`/submissions/${submission.submission.id}/scores`, 'GET', judge.token);
   assert.equal(recorded.scores.length, 3);
   assert.ok(recorded.scores.every(score => score.judgingAssignmentId === assigned.assignments[0].id));
   assigned = await request(`/events/${eventId}/judging-assignments`, 'GET', judge.token);
   assert.equal(assigned.assignments[0].status, 'completed');
   await request(`/events/${eventId}/complete`, 'POST', organizer.token, {});
+  await request(`/events/${eventId}/results/publish`, 'POST', organizer.token, { public: true });
   const board = await request(`/events/${eventId}/leaderboard`, 'GET', participant.token);
   assert.equal(board.leaderboard[0].team.name, 'Workflow Team');
-  assert.equal(board.leaderboard[0].score, 24);
+  assert.equal(board.leaderboard[0].score, 80);
   console.log('PASS: registration, login, relational rubric criteria, tracks, track eligibility, submissions, assignment states, scores, and leaderboard.');
 } catch (error) {
   console.error(error);

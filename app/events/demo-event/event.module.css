@@ -32,28 +32,29 @@
   position: relative;
   display: grid;
   min-height: 315px;
-  grid-template-columns: minmax(0, 1fr) 255px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 255px);
   align-items: center;
   gap: 30px;
   overflow: hidden;
   padding: 28px 30px;
   border-radius: 8px;
   background-color: #183a31;
-  background-image:
-    linear-gradient(90deg, rgba(18, 49, 39, 0.97) 0%, rgba(18, 49, 39, 0.88) 47%, rgba(18, 49, 39, 0.52) 100%),
-    url("https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1600&q=85");
-  background-position: center, center 48%;
+  background-image: linear-gradient(120deg, #244f3e 0%, #38664f 58%, #557d5c 100%);
+  background-position: center;
   background-size: cover;
   color: white;
   animation: event-enter 450ms ease both;
 }
 
 .heroCopy {
+  min-width: 0;
   max-width: 610px;
 }
 
 .heroEyebrow {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 9px;
   margin: 0 0 17px;
@@ -88,6 +89,7 @@
 }
 
 .heroCopy > p {
+  overflow-wrap: anywhere;
   max-width: 450px;
   margin: 13px 0 0;
   color: #d4dfd7;
@@ -113,6 +115,7 @@
 }
 
 .heroMeta {
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
@@ -120,11 +123,14 @@
 }
 
 .heroMeta span {
+  min-width: 0;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   color: #edf3e9;
   font-size: 9px;
+  overflow-wrap: anywhere;
 }
 
 .heroMeta svg {
@@ -132,11 +138,20 @@
 }
 
 .joinPanel {
+  min-width: 0;
   padding: 16px 17px 14px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 6px;
   background: rgba(14, 39, 31, 0.68);
   backdrop-filter: blur(10px);
+}
+
+.joinPanel :global(.event-countdown) {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .registrationBadge {
@@ -182,12 +197,15 @@
 }
 
 .deadline {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   margin: 8px 0 13px;
   color: #d8e3d9;
   font-size: 8px;
+  overflow-wrap: anywhere;
 }
 
 .joinButton {
@@ -519,7 +537,7 @@
 
 @media (max-width: 1080px) {
   .eventHero {
-    grid-template-columns: minmax(0, 1fr) 230px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 230px);
     gap: 20px;
     padding: 24px;
   }
@@ -531,7 +549,7 @@
 
 @media (max-width: 840px) {
   .eventMain { padding-top: 19px; }
-  .eventHero { grid-template-columns: minmax(0, 1fr) 230px; min-height: 300px; }
+  .eventHero { grid-template-columns: minmax(0, 1fr) minmax(0, 230px); min-height: 300px; }
   .heroCopy h1 { font-size: 36px; }
   .detailsGrid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   .sidebarDetails { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 14px; }

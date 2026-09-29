@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { apiRequest } from "../lib/api";
 import styles from "./gallery.module.css";
 
 type Project = {
@@ -9,24 +10,15 @@ type Project = {
   name: string;
   tagline: string;
   team: string;
-  track: "Open source" | "Community" | "Climate";
+  track: string;
   tags: string[];
   mark: string;
   tone: "green" | "coral" | "blue";
-  updated: number;
+  updated: string;
   featured?: boolean;
 };
 
-const projects: Project[] = [
-  { id: "civicsignal", name: "CivicSignal", tagline: "A better way to be heard locally.", team: "Pixel Pioneers", track: "Community", tags: ["Next.js", "Open data", "Civic tech"], mark: "C", tone: "coral", updated: 9, featured: true },
-  { id: "openshelf", name: "OpenShelf", tagline: "Making neighborhood sharing feel effortless.", team: "Good Neighbors", track: "Community", tags: ["TypeScript", "Mutual aid", "Maps"], mark: "O", tone: "green", updated: 8, featured: true },
-  { id: "lumen", name: "Lumen", tagline: "A clearer picture of your everyday footprint.", team: "Soft Systems", track: "Climate", tags: ["React", "Data viz", "Climate"], mark: "L", tone: "blue", updated: 7 },
-  { id: "patchwork", name: "Patchwork", tagline: "Small skills, shared locally, made useful.", team: "Common Thread", track: "Open source", tags: ["Svelte", "Learning", "Community"], mark: "P", tone: "green", updated: 6 },
-  { id: "tidepool", name: "Tidepool", tagline: "Turn shoreline observations into action.", team: "Blue Hour", track: "Climate", tags: ["Python", "Sensors", "Open data"], mark: "T", tone: "blue", updated: 5 },
-  { id: "kindred", name: "Kindred", tagline: "A softer way to ask for a little help.", team: "Good Company", track: "Community", tags: ["Remix", "Care", "Design"], mark: "K", tone: "coral", updated: 4 },
-  { id: "commons", name: "Commons Kit", tagline: "Practical building blocks for public-interest tools.", team: "Civic Stack", track: "Open source", tags: ["Node.js", "Open source", "APIs"], mark: "C", tone: "green", updated: 3 },
-  { id: "seedling", name: "Seedling", tagline: "Plan a more resilient garden, one plot at a time.", team: "Good Futures", track: "Climate", tags: ["Vue", "Gardens", "Planning"], mark: "S", tone: "blue", updated: 2 },
-];
+type ApiProject = { id: string; title: string; tagline: string; track: string; tags: string[]; createdAt: string; team?: { name: string } | null };
 
 function Icon({ name, size = 17 }: { name: "arrow" | "search" | "sliders"; size?: number }) {
   const paths = {
@@ -65,9 +57,25 @@ function ProjectCard({ project }: { project: Project }) {
 }
 
 export default function GalleryExplorer() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const [track, setTrack] = useState("all");
   const [sort, setSort] = useState("featured");
+
+  useEffect(() => {
+    apiRequest<{ projects: ApiProject[] }>("/api/gallery")
+      .then(({ projects: data }) => setProjects(data.map((project, index) => ({
+        id: project.id, name: project.title, tagline: project.tagline,
+        team: project.team?.name || "HackForge team", track: project.track,
+        tags: project.tags || [], mark: project.title.slice(0, 1).toUpperCase(),
+        tone: (["green", "coral", "blue"] as const)[index % 3], updated: project.createdAt,
+      }))))
+      .catch((error: unknown) => setLoadError(error instanceof Error ? error.message : "Projects could not be loaded."))
+      .finally(() => setLoading(false));
+  }, []);
+  const tracks = useMemo(() => [...new Set(projects.map(project => project.track))].sort(), [projects]);
 
   const visibleProjects = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -78,9 +86,9 @@ export default function GalleryExplorer() {
     });
 
     return [...filtered].sort((first, second) => {
-      if (sort === "newest") return second.updated - first.updated;
+      if (sort === "newest") return second.updated.localeCompare(first.updated);
       if (sort === "name") return first.name.localeCompare(second.name);
-      return Number(Boolean(second.featured)) - Number(Boolean(first.featured)) || second.updated - first.updated;
+      return second.updated.localeCompare(first.updated);
     });
   }, [query, sort, track]);
 
@@ -103,9 +111,7 @@ export default function GalleryExplorer() {
             <span className={styles.controlLabel}>Track</span>
             <select aria-label="Filter by track" onChange={(event) => setTrack(event.target.value)} value={track}>
               <option value="all">All tracks</option>
-              <option value="Open source">Open source</option>
-              <option value="Community">Community</option>
-              <option value="Climate">Climate</option>
+              {tracks.map(item => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
           <label className={styles.selectField}>
@@ -125,7 +131,8 @@ export default function GalleryExplorer() {
         <span>{visibleProjects.length} {visibleProjects.length === 1 ? "project" : "projects"}</span>
       </div>
 
-      {visibleProjects.length > 0 ? (
+      {loadError && <p role="alert">{loadError}</p>}
+      {loading ? <p role="status">Loading submitted projects…</p> : visibleProjects.length > 0 ? (
         <div className={styles.projectGrid}>
           {visibleProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
         </div>

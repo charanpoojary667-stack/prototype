@@ -1,15 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { apiBody, apiRequest } from "../../../lib/api";
 import type { ProjectRecord } from "../project-data";
 import styles from "./view.module.css";
 
-type Comment = { id: number; initials: string; name: string; time: string; text: string; tone: string };
-
-const initialComments: Comment[] = [
-  { id: 1, initials: "MK", name: "Maya Kim", time: "2 hours ago", text: "The neighborhood feedback loop is such a thoughtful idea. I especially love how actionable the map view feels.", tone: "blue" },
-  { id: 2, initials: "AS", name: "Alex Santos", time: "Yesterday", text: "This makes open data feel approachable. Curious to see where the community takes it next!", tone: "yellow" },
-];
+type Comment = { id: string; body: string; createdAt: string; author?: { id: string; name: string } };
 
 function Icon({ name, size = 17 }: { name: "arrow" | "check" | "github" | "heart" | "link" | "send" | "users"; size?: number }) {
   const paths = {
@@ -29,23 +25,42 @@ function TeamMember({ initials, name, role, tone }: { initials: string; name: st
   return <div className={styles.member}><span className={`${styles.memberAvatar} ${styles[tone]}`}>{initials}</span><span><strong>{name}</strong><small>{role}</small></span></div>;
 }
 
-export default function PublicProjectView({ project }: { project: ProjectRecord }) {
-  const [votes, setVotes] = useState(247);
-  const [hasVoted, setHasVoted] = useState(false);
-  const [comments, setComments] = useState(initialComments);
+export default function PublicProjectView({ project, comments, voteCount, votingEnabled, hasVoted, onVote, onCommentsChange }: {
+  project: ProjectRecord;
+  comments: Comment[];
+  voteCount: number | null;
+  votingEnabled: boolean;
+  hasVoted: boolean;
+  onVote: () => void;
+  onCommentsChange: (comments: Comment[]) => void;
+}) {
   const [commentText, setCommentText] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [pending, setPending] = useState(false);
 
-  function toggleVote() {
-    setHasVoted((current) => !current);
-    setVotes((current) => current + (hasVoted ? -1 : 1));
+  async function vote() {
+    setPending(true); setFeedback("");
+    try {
+      await apiRequest(`/api/projects/${project.id}/vote`, { method: "POST", body: apiBody({}) });
+      onVote();
+      setFeedback("Your vote has been recorded.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Your vote could not be saved.");
+    } finally { setPending(false); }
   }
 
-  function handleComment(event: FormEvent<HTMLFormElement>) {
+  async function handleComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = commentText.trim();
     if (!text) return;
-    setComments((current) => [...current, { id: Date.now(), initials: "JL", name: "Jordan Lee", time: "Just now", text, tone: "coral" }]);
-    setCommentText("");
+    setPending(true); setFeedback("");
+    try {
+      const result = await apiRequest<{ comment: Comment }>(`/api/projects/${project.id}/comments`, { method: "POST", body: apiBody({ body: text }) });
+      onCommentsChange([...comments, result.comment]);
+      setCommentText("");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Your comment could not be saved.");
+    } finally { setPending(false); }
   }
 
   return (
@@ -73,10 +88,15 @@ export default function PublicProjectView({ project }: { project: ProjectRecord 
             <form className={styles.commentForm} onSubmit={handleComment}>
               <label className={styles.visuallyHidden} htmlFor="project-comment">Add a comment</label>
               <textarea id="project-comment" maxLength={280} onChange={(event) => setCommentText(event.target.value)} placeholder="Share a thought about this project..." rows={3} value={commentText} />
-              <div><span>{commentText.length}/280</span><button type="submit">Post comment <Icon name="send" size={14} /></button></div>
+              <div><span>{commentText.length}/280</span><button disabled={pending || !commentText.trim()} type="submit">Post comment <Icon name="send" size={14} /></button></div>
             </form>
+            {feedback && <p role="status">{feedback}</p>}
             <div className={styles.commentList}>
-              {comments.map((comment) => <article className={styles.comment} key={comment.id}><span className={`${styles.commentAvatar} ${styles[comment.tone]}`}>{comment.initials}</span><div><div className={styles.commentMeta}><strong>{comment.name}</strong><span>{comment.time}</span></div><p>{comment.text}</p></div></article>)}
+              {comments.map((comment, index) => {
+                const name = comment.author?.name || "HackForge member";
+                const initials = name.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase();
+                return <article className={styles.comment} key={comment.id}><span className={`${styles.commentAvatar} ${styles[index % 2 === 0 ? "coralAvatar" : "blueAvatar"]}`}>{initials}</span><div><div className={styles.commentMeta}><strong>{name}</strong><span>{new Date(comment.createdAt).toLocaleString()}</span></div><p>{comment.body}</p></div></article>;
+              })}
             </div>
           </section>
         </div>
@@ -84,9 +104,9 @@ export default function PublicProjectView({ project }: { project: ProjectRecord 
         <aside className={styles.sidebarColumn}>
           <section className={styles.votePanel} aria-label="Community voting">
             <div className={styles.voteLabel}><Icon name="heart" size={15} /> COMMUNITY VOTE</div>
-            <strong>{votes}</strong><span>people think this is worth building</span>
-            <button className={hasVoted ? styles.voted : ""} aria-pressed={hasVoted} onClick={toggleVote} type="button"><Icon name={hasVoted ? "check" : "heart"} size={16} /> {hasVoted ? "Voted" : "Upvote project"}</button>
-            <small>Frontend preview only. Votes are not stored.</small>
+            <strong>{voteCount === null ? "—" : voteCount}</strong><span>{voteCount === null ? "Vote totals stay hidden while voting is open." : "community votes"}</span>
+            {votingEnabled && <button className={hasVoted ? styles.voted : ""} aria-pressed={hasVoted} disabled={hasVoted || pending} onClick={vote} type="button"><Icon name={hasVoted ? "check" : "heart"} size={16} /> {hasVoted ? "Voted" : "Upvote project"}</button>}
+            {!votingEnabled && <small>Community voting is closed.</small>}
           </section>
 
           <section className={styles.infoPanel} aria-labelledby="team-title">

@@ -1,21 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { apiRequest } from "../../lib/api";
 import styles from "./judge.module.css";
 
 type ReviewStatus = "Needs review" | "In progress" | "Completed";
 type Assignment = { id: string; name: string; team: string; track: string; status: ReviewStatus; submitted: string; mark: string; tone: "green" | "coral" | "blue" };
 
-const assignments: Assignment[] = [
-  { id: "civicsignal", name: "CivicSignal", team: "Pixel Pioneers", track: "Community & civic tech", status: "Completed", submitted: "Sep 25, 2026", mark: "C", tone: "coral" },
-  { id: "openshelf", name: "OpenShelf", team: "Good Neighbors", track: "Community & civic tech", status: "Needs review", submitted: "Sep 26, 2026", mark: "O", tone: "green" },
-  { id: "lumen", name: "Lumen", team: "Soft Systems", track: "Climate & good futures", status: "In progress", submitted: "Sep 26, 2026", mark: "L", tone: "blue" },
-  { id: "patchwork", name: "Patchwork", team: "Common Thread", track: "Open source for everyone", status: "Needs review", submitted: "Sep 27, 2026", mark: "P", tone: "green" },
-  { id: "tidepool", name: "Tidepool", team: "Blue Hour", track: "Climate & good futures", status: "Needs review", submitted: "Sep 27, 2026", mark: "T", tone: "blue" },
-  { id: "kindred", name: "Kindred", team: "Good Company", track: "Community & civic tech", status: "In progress", submitted: "Sep 27, 2026", mark: "K", tone: "coral" },
-  { id: "commons", name: "Commons Kit", team: "Civic Stack", track: "Open source for everyone", status: "Completed", submitted: "Sep 24, 2026", mark: "C", tone: "green" },
-  { id: "seedling", name: "Seedling", team: "Good Futures", track: "Climate & good futures", status: "Completed", submitted: "Sep 24, 2026", mark: "S", tone: "blue" },
-];
+type AssignmentApi = { id: string; status: "assigned" | "in_progress" | "completed"; project: { id: string; title: string; track: string; submittedAt?: string; team?: { name: string } } };
 
 function Icon({ name, size = 16 }: { name: "arrow" | "check" | "search" | "trophy"; size?: number }) {
   const paths = {
@@ -27,7 +20,7 @@ function Icon({ name, size = 16 }: { name: "arrow" | "check" | "search" | "troph
   return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-function AssignmentCard({ assignment, onReview }: { assignment: Assignment; onReview: (name: string) => void }) {
+function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const statusClass = assignment.status === "Completed" ? styles.statusCompleted : assignment.status === "In progress" ? styles.statusProgress : styles.statusNeeds;
   return (
     <article className={styles.assignmentCard}>
@@ -37,33 +30,38 @@ function AssignmentCard({ assignment, onReview }: { assignment: Assignment; onRe
         <h2>{assignment.name}</h2>
         <p className={styles.team}><span>{assignment.team.slice(0, 1)}</span> {assignment.team}</p>
         <p className={styles.submitted}>Submitted {assignment.submitted}</p>
-        <button className={styles.reviewButton} onClick={() => onReview(assignment.name)} type="button">{assignment.status === "Completed" ? "View Review" : "Review Project"} <Icon name="arrow" size={14} /></button>
+        <Link className={styles.reviewButton} href={`/judge/projects/${assignment.id}`}>{assignment.status === "Completed" ? "View Review" : "Review Project"} <Icon name="arrow" size={14} /></Link>
       </div>
     </article>
   );
 }
 
 export default function JudgeDashboard() {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+  useEffect(() => {
+    apiRequest<{ assignments: AssignmentApi[] }>("/api/judge/assignments").then(({ assignments: data }) => setAssignments(data.map(item => ({ id: item.project.id, name: item.project.title, team: item.project.team?.name || "HackForge team", track: item.project.track, status: item.status === "completed" ? "Completed" : item.status === "in_progress" ? "In progress" : "Needs review", submitted: item.project.submittedAt ? new Date(item.project.submittedAt).toLocaleDateString() : "Recently", mark: item.project.title.slice(0, 1), tone: "green" })))).catch(reason => setError(reason instanceof Error ? reason.message : "Assignments could not be loaded."));
+  }, []);
   const visibleAssignments = useMemo(() => assignments.filter((assignment) => {
     const matchesStatus = status === "all" || assignment.status === status;
     const searchable = `${assignment.name} ${assignment.team} ${assignment.track}`.toLowerCase();
     return matchesStatus && searchable.includes(query.trim().toLowerCase());
   }), [query, status]);
 
-  function handleReview(name: string) {
-    setNotice(`${name} review preview opened. Judging workflows are not connected yet.`);
-  }
+  const completed = assignments.filter(item => item.status === "Completed").length;
+  const inProgress = assignments.filter(item => item.status === "In progress").length;
+  const progress = assignments.length ? Math.round(completed / assignments.length * 100) : 0;
 
   return (
     <section className={styles.dashboardContent} aria-labelledby="assigned-title">
+      {error && <p role="alert">{error}</p>}
       <div className={styles.statsGrid} aria-label="Review progress">
-        <article className={`${styles.statCard} ${styles.statCardAccent}`}><span className={styles.statIcon}><Icon name="trophy" size={17} /></span><p>ASSIGNED PROJECTS</p><strong>8</strong><small>Across all tracks</small></article>
-        <article className={styles.statCard}><span className={`${styles.statIcon} ${styles.statIconGreen}`}><Icon name="check" size={17} /></span><p>COMPLETED REVIEWS</p><strong>3</strong><small>Nice work so far</small></article>
-        <article className={styles.statCard}><span className={`${styles.statIcon} ${styles.statIconCoral}`}><Icon name="arrow" size={17} /></span><p>REMAINING REVIEWS</p><strong>5</strong><small>Due Oct 11 at 6 PM</small></article>
-        <article className={styles.progressCard}><div className={styles.progressTop}><p>REVIEW PROGRESS</p><strong>38%</strong></div><div className={styles.progressTrack}><span /></div><small>3 of 8 assigned projects reviewed</small></article>
+        <article className={`${styles.statCard} ${styles.statCardAccent}`}><span className={styles.statIcon}><Icon name="trophy" size={17} /></span><p>ASSIGNED PROJECTS</p><strong>{assignments.length}</strong><small>Across assigned tracks</small></article>
+        <article className={styles.statCard}><span className={`${styles.statIcon} ${styles.statIconGreen}`}><Icon name="check" size={17} /></span><p>COMPLETED REVIEWS</p><strong>{completed}</strong><small>Nice work so far</small></article>
+        <article className={styles.statCard}><span className={`${styles.statIcon} ${styles.statIconCoral}`}><Icon name="arrow" size={17} /></span><p>REMAINING REVIEWS</p><strong>{assignments.length - completed}</strong><small>{inProgress} in progress</small></article>
+        <article className={styles.progressCard}><div className={styles.progressTop}><p>REVIEW PROGRESS</p><strong>{progress}%</strong></div><div className={styles.progressTrack}><span style={{ width: `${progress}%` }} /></div><small>{completed} of {assignments.length} assigned projects reviewed</small></article>
       </div>
 
       <div className={styles.listHeading}><div><p className={styles.sectionEyebrow}>YOUR QUEUE</p><h2 id="assigned-title">Assigned projects</h2></div><span>8 total assignments</span></div>
@@ -71,9 +69,7 @@ export default function JudgeDashboard() {
         <label className={styles.searchField}><span className={styles.visuallyHidden}>Search assigned projects</span><Icon name="search" size={16} /><input onChange={(event) => setQuery(event.target.value)} placeholder="Search projects or teams" type="search" value={query} /></label>
         <label className={styles.filterField}><span>SHOW</span><select aria-label="Filter assigned projects by status" onChange={(event) => setStatus(event.target.value)} value={status}><option value="all">All assignments</option><option value="Needs review">Needs review</option><option value="In progress">In progress</option><option value="Completed">Completed</option></select></label>
       </div>
-      {notice && <p className={styles.notice} role="status"><Icon name="check" size={14} /> {notice}</p>}
-      {visibleAssignments.length > 0 ? <div className={styles.assignmentGrid}>{visibleAssignments.map((assignment) => <AssignmentCard assignment={assignment} key={assignment.id} onReview={handleReview} />)}</div> : <div className={styles.emptyState} role="status"><span><Icon name="trophy" size={22} /></span><p>NO ASSIGNMENTS FOUND</p><h2>Your judging queue is clear.</h2><small>Try another search or remove the status filter to see all assigned projects.</small><button onClick={() => { setQuery(""); setStatus("all"); }} type="button">Clear filters <Icon name="arrow" size={14} /></button></div>}
-      <p className={styles.previewNote}><span /> Frontend preview only. Judge access and review submissions are not connected.</p>
+      {visibleAssignments.length > 0 ? <div className={styles.assignmentGrid}>{visibleAssignments.map((assignment) => <AssignmentCard assignment={assignment} key={assignment.id} />)}</div> : <div className={styles.emptyState} role="status"><span><Icon name="trophy" size={22} /></span><p>NO ASSIGNMENTS FOUND</p><h2>Your judging queue is clear.</h2><small>Try another search or remove the status filter to see all assigned projects.</small><button onClick={() => { setQuery(""); setStatus("all"); }} type="button">Clear filters <Icon name="arrow" size={14} /></button></div>}
     </section>
   );
 }

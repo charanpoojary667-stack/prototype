@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ProjectRecord } from "../project-data";
+import { apiBody, apiRequest } from "../../../lib/api";
 import styles from "./submission.module.css";
 
 function Icon({ name, size = 16 }: { name: "arrow" | "calendar" | "check" | "close" | "link" | "lock" | "spark"; size?: number }) {
@@ -13,13 +14,19 @@ function Icon({ name, size = 16 }: { name: "arrow" | "calendar" | "check" | "clo
   return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-export default function SubmissionPanel({ project }: { project: ProjectRecord }) {
-  const [submitted, setSubmitted] = useState(false);
+export default function SubmissionPanel({ project, initialStatus, deadline }: { project: ProjectRecord; initialStatus: string; deadline: string }) {
+  const [submitted, setSubmitted] = useState(initialStatus === "SUBMITTED");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmClosing, setConfirmClosing] = useState(false);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("");
-  const deadlinePassed = false;
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    const initialTick = window.setTimeout(() => setNow(Date.now()), 0);
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => { window.clearTimeout(initialTick); window.clearInterval(timer); };
+  }, []);
+  const deadlinePassed = now > 0 && now > Date.parse(deadline);
 
   function closeConfirmation() {
     if (confirmClosing) return;
@@ -31,20 +38,25 @@ export default function SubmissionPanel({ project }: { project: ProjectRecord })
     }, closeDelay);
   }
 
-  function saveDraft() {
-    setNotice("Draft saved in this preview. Nothing was sent or stored.");
+  async function saveDraft() {
+    setPending(true);
+    try { await apiRequest(`/api/projects/${project.id}`, { method: "PATCH", body: apiBody({ title: project.name, tagline: project.tagline, summary: project.description, trackId: project.trackId, tags: project.technologies, repositoryUrl: project.repositoryUrl === "#" ? "" : project.repositoryUrl, demoUrl: project.demoUrl === "#" ? "" : project.demoUrl }) }); setNotice("Draft saved."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Draft could not be saved."); }
+    finally { setPending(false); }
   }
 
-  function confirmSubmission() {
+  async function confirmSubmission() {
     setPending(true);
-    window.setTimeout(() => { setSubmitted(true); closeConfirmation(); setPending(false); setNotice("Submitted successfully. Your project is now locked for this preview."); }, 450);
+    try { await apiRequest(`/api/projects/${project.id}/submit`, { method: "POST", body: apiBody({}) }); setSubmitted(true); closeConfirmation(); setNotice("Submitted successfully. Your project is now locked for editing."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Project could not be submitted."); }
+    finally { setPending(false); }
   }
 
   return <>
-    <header className={styles.pageHeader}><div><p className={styles.eyebrow}><span /> DOGFOOD HACKATHON <i /> SUBMISSION STATUS</p><h1>{submitted ? "Your project is submitted." : "Ready to submit, {project.name}?"}</h1><p>{submitted ? "The team’s work has been sent to the hackathon showcase." : "A final look before your team sends CivicSignal into the showcase."}</p></div><span className={`${styles.statusBadge} ${submitted ? styles.statusSubmitted : ""}`}><i /> {submitted ? "SUBMITTED" : "DRAFT"}</span></header>
+    <header className={styles.pageHeader}><div><p className={styles.eyebrow}><span /> DOGFOOD HACKATHON <i /> SUBMISSION STATUS</p><h1>{submitted ? "Your project is submitted." : `Ready to submit ${project.name}?`}</h1><p>{submitted ? "The team’s work has been sent to the hackathon showcase." : "Review the final details before sending your project to the showcase."}</p></div><span className={`${styles.statusBadge} ${submitted ? styles.statusSubmitted : ""}`}><i /> {submitted ? "SUBMITTED" : "DRAFT"}</span></header>
 
-    {submitted && <section className={styles.successState} aria-live="polite"><span><Icon name="check" size={23} /></span><div><p>SUBMISSION COMPLETE</p><h2>Submitted successfully</h2><small>Your project is locked for this preview. The backend will handle final submission records later.</small></div><Link href={`/projects/${project.id}/view`}>View project <Icon name="arrow" size={14} /></Link></section>}
-    {deadlinePassed && !submitted && <div className={styles.deadlineWarning} role="alert"><Icon name="calendar" size={17} /><div><strong>The submission deadline has passed.</strong><span>This is a frontend preview; deadline enforcement is not connected.</span></div></div>}
+    {submitted && <section className={styles.successState} aria-live="polite"><span><Icon name="check" size={23} /></span><div><p>SUBMISSION COMPLETE</p><h2>Submitted successfully</h2><small>Your project is published to the event gallery.</small></div><Link href={`/projects/${project.id}/view`}>View project <Icon name="arrow" size={14} /></Link></section>}
+    {deadlinePassed && !submitted && <div className={styles.deadlineWarning} role="alert"><Icon name="calendar" size={17} /><div><strong>The submission deadline has passed.</strong><span>The event is no longer accepting submissions.</span></div></div>}
 
     <div className={styles.statusLayout}>
       <div className={styles.primaryColumn}>

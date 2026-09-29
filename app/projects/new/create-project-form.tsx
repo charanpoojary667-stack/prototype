@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { apiBody, apiRequest } from "../../lib/api";
 import styles from "./project.module.css";
 
-const tracks = [
-  { id: "open-source", number: "01", name: "Open source for everyone", detail: "Tools that invite more people to learn, contribute, and create.", color: "green" },
-  { id: "community", number: "02", name: "Community & civic tech", detail: "Practical ideas that bring neighbors and local communities closer.", color: "coral" },
-  { id: "climate", number: "03", name: "Climate & good futures", detail: "Grounded ways to care for the places we share.", color: "blue" },
-];
+type TrackOption = { id: string; number: string; name: string; detail: string; color: string };
+type TeamSummary = { id: string; name: string; memberIds: string[]; members: { id: string; name: string }[] };
 
 type FieldName = "name" | "tagline" | "description" | "track" | "githubUrl" | "demoUrl";
 type FieldErrors = Partial<Record<FieldName, string>>;
@@ -45,6 +44,9 @@ function validateUrl(value: string, label: string) {
 }
 
 export default function CreateProjectForm() {
+  const router = useRouter();
+  const [tracks, setTracks] = useState<TrackOption[]>([]);
+  const [team, setTeam] = useState<TeamSummary | null>(null);
   const [projectName, setProjectName] = useState("");
   const [tagline, setTagline] = useState("");
   const [description, setDescription] = useState("");
@@ -54,6 +56,16 @@ export default function CreateProjectForm() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [feedback, setFeedback] = useState("");
   const [feedbackKind, setFeedbackKind] = useState<"success" | "error">("success");
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    Promise.all([apiRequest<{ event: { tracks: { id: string; name: string; description: string }[] } }>("/api/events/demo-event"), apiRequest<{ teams: TeamSummary[] }>("/api/teams?eventId=demo-event")])
+      .then(([result, teamResult]) => {
+        setTracks(result.event.tracks.map((track, index) => ({ id: track.id, number: String(index + 1).padStart(2, "0"), name: track.name, detail: track.description, color: (["green", "coral", "blue"] as const)[index % 3] })));
+        setTeam(teamResult.teams[0] || null);
+      })
+      .catch((error: unknown) => setFeedback(error instanceof Error ? error.message : "Event or team data could not be loaded."));
+  }, []);
 
   function addTag() {
     const nextTag = tagInput.trim().replace(/,$/, "");
@@ -70,7 +82,7 @@ export default function CreateProjectForm() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     const formData = new FormData(event.currentTarget, submitter as HTMLButtonElement | null);
@@ -102,10 +114,19 @@ export default function CreateProjectForm() {
       return;
     }
 
-    setFeedback(intent === "draft"
-      ? "Draft saved in this preview. No data has been sent or stored."
-      : "Project created in this preview. No data has been sent or stored.");
-    setFeedbackKind("success");
+    setPending(true);
+    try {
+      const result = await apiRequest<{ project: { id: string } }>("/api/projects", { method: "POST", body: apiBody({
+        eventId: "demo-event", title: name, tagline: nextTagline, summary: nextDescription,
+        trackId: selectedTrack || null, tags, repositoryUrl: githubUrl, demoUrl,
+      }) });
+      if (intent === "create") await apiRequest(`/api/projects/${result.project.id}/submit`, { method: "POST", body: apiBody({}) });
+      router.push(intent === "create" ? `/projects/${result.project.id}/submission` : `/projects/${result.project.id}`);
+      router.refresh();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "The project could not be saved.");
+      setFeedbackKind("error");
+    } finally { setPending(false); }
   }
 
   function clearError(field: FieldName) {
@@ -264,8 +285,8 @@ export default function CreateProjectForm() {
         <div className={styles.formActions}>
           <Link className={styles.cancelLink} href="/">Cancel</Link>
           <div>
-            <button className={styles.draftButton} name="intent" type="submit" value="draft">Save as Draft</button>
-            <button className={styles.createButton} name="intent" type="submit" value="create">Create Project <Icon name="arrow" size={15} /></button>
+            <button className={styles.draftButton} disabled={pending} name="intent" type="submit" value="draft">{pending ? "Saving…" : "Save as Draft"}</button>
+            <button className={styles.createButton} disabled={pending} name="intent" type="submit" value="create">{pending ? "Submitting…" : "Create Project"} {!pending && <Icon name="arrow" size={15} />}</button>
           </div>
         </div>
         {feedback && (
@@ -295,19 +316,17 @@ export default function CreateProjectForm() {
 
         <section className={styles.teamPanel} aria-labelledby="team-summary-title">
           <div className={styles.teamPanelHeading}><span className={styles.teamIcon}><Icon name="users" size={17} /></span><span>YOUR TEAM</span><span className={styles.teamStatus}>READY</span></div>
-          <h2 id="team-summary-title">Pixel Pioneers</h2>
-          <p>Building for DOGFOOD Hackathon</p>
+          <h2 id="team-summary-title">{team?.name || "No event team found"}</h2>
+          <p>{team ? "Building for DOGFOOD Hackathon" : "Register and join or create a team before starting a project."}</p>
           <div className={styles.teamMembers}>
-            <span className={`${styles.memberAvatar} ${styles.avatarJordan}`}>JL</span>
-            <span className={`${styles.memberAvatar} ${styles.avatarMaya}`}>MK</span>
-            <span className={`${styles.memberAvatar} ${styles.avatarAlex}`}>AS</span>
-            <span className={styles.memberMore}>+1</span>
-            <span className={styles.memberCount}>4 <i>/ 5 members</i></span>
+            {team?.members.slice(0, 3).map((member, index) => <span className={`${styles.memberAvatar} ${[styles.avatarJordan, styles.avatarMaya, styles.avatarAlex][index]}`} key={member.id}>{member.name.split(/\s+/).map(part => part[0]).join("").slice(0, 2)}</span>)}
+            {team && team.members.length > 3 && <span className={styles.memberMore}>+{team.members.length - 3}</span>}
+            <span className={styles.memberCount}>{team?.memberIds.length || 0} <i>/ 5 members</i></span>
           </div>
           <Link href="/teams/demo-team" className={styles.teamLink}>View team <Icon name="arrow" size={14} /></Link>
         </section>
 
-        <p className={styles.previewNote}><span /> Preview only. Your project details aren’t stored or submitted.</p>
+        <p className={styles.previewNote}><span /> Drafts and submissions are saved to the local event database.</p>
       </aside>
     </form>
   );

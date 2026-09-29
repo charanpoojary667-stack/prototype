@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { apiRequest } from "./lib/api";
 
 type NavigationItem = { label: string; href: string; icon: "calendar" | "grid" | "image" | "project" | "team" | "judge" | "trophy" | "results" };
 
@@ -42,10 +45,14 @@ function isCurrentPage(pathname: string, href: string) {
 }
 
 function GlobalNavigation({ pathname }: { pathname: string }) {
+  const [account, setAccount] = useState<{ name: string; role: string } | null>(null);
+  const router = useRouter();
+  useEffect(() => { apiRequest<{ user: { name: string; role: string } }>("/api/auth/me").then(({ user }) => setAccount(user)).catch(() => setAccount(null)); }, []);
+  async function logout() { await apiRequest("/api/auth/logout", { method: "POST" }); setAccount(null); router.push("/login"); router.refresh(); }
   return <aside className="sidebar global-navigation"><Link className="brand" href="/" aria-label="HackForge home"><span className="brand-mark"><i /><i /><i /></span><span>Hack<span>Forge</span></span></Link><p className="sidebar-label">HACKFORGE WORKSPACE</p><nav className="sidebar-nav" aria-label="Primary navigation">{navigation.map((item) => {
     const active = isCurrentPage(pathname, item.href);
     return <Link aria-current={active ? "page" : undefined} className={active ? "sidebar-link sidebar-link--active" : "sidebar-link"} href={item.href} key={item.href}><Icon name={item.icon} size={18} /><span>{item.label}</span>{active && <span className="sidebar-active-marker" />}</Link>;
-  })}</nav><div className="sidebar-bottom"><div className="sidebar-event-note"><div className="sidebar-event-label"><span className="live-dot" /> EVENT LIVE</div><strong>DOGFOOD Hackathon</strong><span>Oct 9–11, 2026</span><Link href="/events/demo-event">View event <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link></div><span className="sidebar-version">HACKFORGE COMMUNITY <span>·</span> OPEN SOURCE</span></div></aside>;
+  })}</nav><div className="sidebar-bottom"><div className="sidebar-event-note"><div className="sidebar-event-label"><span className="live-dot" /> EVENT LIVE</div><strong>DOGFOOD Hackathon</strong><span>Oct 9–11, 2026</span><Link href="/events/demo-event">View event <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link>{account ? <><span>{account.name} · {account.role}</span><button className="sidebar-link" onClick={logout} type="button">Sign out</button></> : <Link href="/login">Sign in</Link>}</div><span className="sidebar-version">HACKFORGE COMMUNITY <span>·</span> OPEN SOURCE</span></div></aside>;
 }
 
 export default function AppFrame({ children }: { children: ReactNode }) {

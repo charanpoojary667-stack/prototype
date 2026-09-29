@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useRouter } from "next/navigation";
+import { apiBody, apiRequest } from "../../lib/api";
 import Link from "next/link";
 import type { ProjectMember, ProjectRecord } from "./project-data";
 import details from "./details.module.css";
 import styles from "../new/project.module.css";
 
-const tracks = [
-  { id: "open-source", name: "Open source for everyone", number: "01", tone: "green" },
-  { id: "community", name: "Community & civic tech", number: "02", tone: "coral" },
-  { id: "climate", name: "Climate & good futures", number: "03", tone: "blue" },
-];
+type TrackOption = { id: string; name: string; number: string; tone: string };
 
 type FieldName = "name" | "tagline" | "description" | "track" | "teamMembers" | "repositoryUrl" | "demoUrl";
 type FieldErrors = Partial<Record<FieldName, string>>;
@@ -65,6 +63,8 @@ function TeamMember({
 }
 
 export default function ProjectDetailsForm({ project }: { project: ProjectRecord }) {
+  const router = useRouter();
+  const [tracks, setTracks] = useState<TrackOption[]>([]);
   const [name, setName] = useState(project.name);
   const [tagline, setTagline] = useState(project.tagline);
   const [description, setDescription] = useState(project.description);
@@ -78,6 +78,12 @@ export default function ProjectDetailsForm({ project }: { project: ProjectRecord
   const [feedback, setFeedback] = useState("");
   const [feedbackKind, setFeedbackKind] = useState<"success" | "error">("success");
   const [pendingIntent, setPendingIntent] = useState<"draft" | "submit" | null>(null);
+
+  useEffect(() => {
+    apiRequest<{ event: { tracks: { id: string; name: string }[] } }>("/api/events/demo-event")
+      .then(({ event }) => setTracks(event.tracks.map((track, index) => ({ id: track.id, name: track.name, number: String(index + 1).padStart(2, "0"), tone: (["green", "coral", "blue"] as const)[index % 3] }))))
+      .catch(() => setTracks([]));
+  }, []);
 
   const checklistItems = [
     { label: "Project details", complete: Boolean(name.trim() && tagline.trim() && description.trim() && trackId) },
@@ -146,12 +152,25 @@ export default function ProjectDetailsForm({ project }: { project: ProjectRecord
     }
 
     setPendingIntent(intent);
-    await new Promise((resolve) => window.setTimeout(resolve, 450));
-    setFeedback(intent === "draft"
-      ? `Draft changes for ${nextName} are saved in this preview. Nothing was sent or stored.`
-      : `${nextName} is ready to submit in this preview. Nothing was sent or stored.`);
-    setFeedbackKind("success");
-    setPendingIntent(null);
+    try {
+      await apiRequest(`/api/projects/${project.id}`, { method: "PATCH", body: apiBody({
+        title: nextName, tagline: nextTagline, summary: nextDescription, trackId,
+        repositoryUrl: nextRepository, demoUrl: nextDemo, tags: technologies,
+      }) });
+      if (intent === "submit") {
+        await apiRequest(`/api/projects/${project.id}/submit`, { method: "POST", body: apiBody({}) });
+        router.push(`/projects/${project.id}/submission`);
+        router.refresh();
+      } else {
+        setFeedback(`${nextName} draft saved.`);
+        setFeedbackKind("success");
+      }
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Project changes could not be saved.");
+      setFeedbackKind("error");
+    } finally {
+      setPendingIntent(null);
+    }
   }
 
   function toggleMember(memberId: string) {
@@ -314,7 +333,7 @@ export default function ProjectDetailsForm({ project }: { project: ProjectRecord
           </div>
           <Link href="/teams/demo-team" className={styles.teamLink}>View your team <Icon name="arrow" size={14} /></Link>
         </section>
-        <p className={styles.previewNote}><span /> Frontend preview only. Changes aren’t submitted or stored.</p>
+        <p className={styles.previewNote}><span /> Changes are saved to your team’s local event project.</p>
       </aside>
     </form>
   );

@@ -2,19 +2,12 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import type { ProjectRecord } from "../../../projects/[projectId]/project-data";
+import { apiBody, apiRequest } from "../../../lib/api";
 import styles from "./review.module.css";
 
-type Criterion = { id: string; name: string; description: string; weight: number };
+type Criterion = { id: string; name: string; description: string; weight: number; maxScore: number };
 type ReviewStatus = "Draft" | "Submitted";
 type ScoreErrors = Record<string, string>;
-
-const criteria: Criterion[] = [
-  { id: "usefulness", name: "Usefulness & impact", description: "Does this solve a meaningful problem for a clear audience?", weight: 30 },
-  { id: "craft", name: "Craft & execution", description: "How thoughtfully and effectively is the project made?", weight: 25 },
-  { id: "clarity", name: "Clarity of presentation", description: "Can people quickly understand the idea, experience, and value?", weight: 20 },
-  { id: "originality", name: "Originality", description: "Does the project bring a fresh point of view or approach?", weight: 15 },
-  { id: "openSource", name: "Open-source spirit", description: "How well does the project invite learning, contribution, or reuse?", weight: 10 },
-];
 
 function Icon({ name, size = 16 }: { name: "arrow" | "check" | "github" | "link" | "send" | "trophy"; size?: number }) {
   const paths = {
@@ -27,11 +20,11 @@ function Icon({ name, size = 16 }: { name: "arrow" | "check" | "github" | "link"
   return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-export default function JudgeReviewForm({ project }: { project: ProjectRecord }) {
-  const [scores, setScores] = useState<Record<string, string>>({});
+export default function JudgeReviewForm({ project, criteria, existingScores, completed }: { project: ProjectRecord; criteria: Criterion[]; existingScores: { criterionId: string; score: number; feedback?: string }[]; completed: boolean }) {
+  const [scores, setScores] = useState<Record<string, string>>(() => Object.fromEntries(existingScores.map(item => [item.criterionId, String(item.score)])));
   const [feedback, setFeedback] = useState("");
   const [errors, setErrors] = useState<ScoreErrors>({});
-  const [status, setStatus] = useState<ReviewStatus>("Draft");
+  const [status, setStatus] = useState<ReviewStatus>(completed ? "Submitted" : existingScores.length ? "Draft" : "Draft");
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const scorePreview = useMemo(() => criteria.reduce((total, criterion) => total + (Number(scores[criterion.id]) || 0) * criterion.weight, 0) / 100, [scores]);
@@ -40,8 +33,8 @@ export default function JudgeReviewForm({ project }: { project: ProjectRecord })
     const nextErrors: ScoreErrors = {};
     criteria.forEach((criterion) => {
       const value = scores[criterion.id]?.trim() ?? "";
-      if (!value && intent === "submit") nextErrors[criterion.id] = "Add a score from 1 to 10.";
-      else if (value && (!/^\d+(\.\d+)?$/.test(value) || Number(value) < 1 || Number(value) > 10)) nextErrors[criterion.id] = "Use a number from 1 to 10.";
+      if (!value && intent === "submit") nextErrors[criterion.id] = `Add a score from 1 to ${criterion.maxScore}.`;
+      else if (value && (!/^\d+(\.\d+)?$/.test(value) || Number(value) < 0 || Number(value) > criterion.maxScore)) nextErrors[criterion.id] = `Use a score from 0 to ${criterion.maxScore}.`;
     });
     return nextErrors;
   }
@@ -54,10 +47,12 @@ export default function JudgeReviewForm({ project }: { project: ProjectRecord })
     setNotice("");
     if (Object.keys(nextErrors).length > 0) { setNotice("Check the highlighted scores and try again."); return; }
     setPending(intent);
-    await new Promise((resolve) => window.setTimeout(resolve, 400));
-    setStatus(intent === "submit" ? "Submitted" : "Draft");
-    setNotice(intent === "submit" ? "Final review submitted in this preview. Nothing was sent or stored." : "Draft score saved in this preview. Nothing was sent or stored.");
-    setPending(null);
+    try {
+      await apiRequest(`/api/submissions/${project.id}/scores`, { method: "POST", body: apiBody({ final: intent === "submit", scores: criteria.filter(criterion => scores[criterion.id]?.trim()).map(criterion => ({ criterionId: criterion.id, score: Number(scores[criterion.id]), feedback })) }) });
+      setStatus(intent === "submit" ? "Submitted" : "Draft");
+      setNotice(intent === "submit" ? "Final review submitted and saved." : "Draft scores saved.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Scores could not be saved."); }
+    finally { setPending(null); }
   }
 
   function updateScore(id: string, value: string) {
@@ -77,15 +72,15 @@ export default function JudgeReviewForm({ project }: { project: ProjectRecord })
 
         <section className={styles.projectInfo} aria-labelledby="project-summary-title"><div className={styles.sectionEyebrow}>PROJECT STORY</div><h2 id="project-summary-title">What the team built</h2><p>{project.description}</p><div className={styles.links}><a href={project.repositoryUrl} rel="noreferrer" target="_blank"><Icon name="github" size={15} /> Repository <Icon name="arrow" size={13} /></a><a href={project.demoUrl} rel="noreferrer" target="_blank"><Icon name="link" size={15} /> Live demo <Icon name="arrow" size={13} /></a></div></section>
 
-        <section className={styles.rubricSection} aria-labelledby="rubric-title"><div className={styles.rubricHeading}><div><div className={styles.sectionEyebrow}>JUDGING RUBRIC</div><h2 id="rubric-title">Score this project</h2></div><span>1–10 per criterion</span></div><div className={styles.criteriaList}>{criteria.map((criterion, index) => <div className={styles.criterion} key={criterion.id}><div className={styles.criterionNumber}>{String(index + 1).padStart(2, "0")}</div><div className={styles.criterionCopy}><div><h3>{criterion.name}</h3><span>{criterion.weight}% weight</span></div><p>{criterion.description}</p></div><label className={styles.scoreField}><span>Score</span><input aria-describedby={errors[criterion.id] ? `${criterion.id}-error` : undefined} aria-invalid={Boolean(errors[criterion.id])} inputMode="decimal" max="10" min="1" onChange={(event) => updateScore(criterion.id, event.target.value)} placeholder="—" step="0.5" type="number" value={scores[criterion.id] ?? ""} />{errors[criterion.id] && <small id={`${criterion.id}-error`}>{errors[criterion.id]}</small>}</label></div>)}</div></section>
+        <section className={styles.rubricSection} aria-labelledby="rubric-title"><div className={styles.rubricHeading}><div><div className={styles.sectionEyebrow}>JUDGING RUBRIC</div><h2 id="rubric-title">Score this project</h2></div><span>0–{Math.max(...criteria.map(criterion => criterion.maxScore))} per criterion</span></div><div className={styles.criteriaList}>{criteria.map((criterion, index) => <div className={styles.criterion} key={criterion.id}><div className={styles.criterionNumber}>{String(index + 1).padStart(2, "0")}</div><div className={styles.criterionCopy}><div><h3>{criterion.name}</h3><span>{criterion.weight}% weight</span></div><p>{criterion.description}</p></div><label className={styles.scoreField}><span>Score</span><input aria-describedby={errors[criterion.id] ? `${criterion.id}-error` : undefined} aria-invalid={Boolean(errors[criterion.id])} inputMode="decimal" max={criterion.maxScore} min="0" onChange={(event) => updateScore(criterion.id, event.target.value)} placeholder="—" step="1" type="number" value={scores[criterion.id] ?? ""} />{errors[criterion.id] && <small id={`${criterion.id}-error`}>{errors[criterion.id]}</small>}</label></div>)}</div></section>
 
         <section className={styles.feedbackSection} aria-labelledby="feedback-title"><div className={styles.sectionEyebrow}>OPTIONAL</div><h2 id="feedback-title">Written feedback</h2><p>Leave a note the team can learn from.</p><textarea maxLength={800} onChange={(event) => setFeedback(event.target.value)} placeholder="What stood out? What could make this project even stronger?" rows={5} value={feedback} /><span>{feedback.length}/800</span></section>
       </div>
 
       <aside className={styles.sideColumn}>
-        <section className={styles.scoreCard} aria-label="Score preview"><div className={styles.scoreCardTop}><span><Icon name="trophy" size={15} /> SCORE PREVIEW</span><span className={styles.previewBadge}>FRONTEND ONLY</span></div><strong>{scorePreview.toFixed(1)}<small>/ 10</small></strong><p>Weighted subtotal preview based on the scores entered above.</p><div className={styles.scoreBar}><span style={{ width: `${Math.min(scorePreview * 10, 100)}%` }} /></div><small className={styles.disclaimer}>This is a visual preview only. Final judging calculations happen later.</small></section>
+        <section className={styles.scoreCard} aria-label="Score preview"><div className={styles.scoreCardTop}><span><Icon name="trophy" size={15} /> SCORE PREVIEW</span><span className={styles.previewBadge}>LIVE</span></div><strong>{scorePreview.toFixed(1)}<small>/ 10</small></strong><p>Weighted score preview based on the assigned event rubric.</p><div className={styles.scoreBar}><span style={{ width: `${Math.min(scorePreview * 10, 100)}%` }} /></div><small className={styles.disclaimer}>Your scores are stored with this judging assignment.</small></section>
         <section className={styles.guideCard}><div className={styles.sectionEyebrow}>BEFORE YOU SUBMIT</div><h2>Review with care.</h2><ul><li>Use the full 1–10 range thoughtfully.</li><li>Ground feedback in what you experienced.</li><li>Save a draft if you need to come back.</li></ul></section>
-        <div className={styles.actions} aria-live="polite"><button disabled={pending !== null} name="intent" type="submit" value="draft">{pending === "draft" ? "Saving..." : "Save Draft Score"}</button><button className={styles.submitButton} disabled={pending !== null} name="intent" type="submit" value="submit">{pending === "submit" ? "Submitting..." : <>Submit Final Review <Icon name="arrow" size={14} /></>}</button></div>
+        <div className={styles.actions} aria-live="polite"><button disabled={pending !== null || completed} name="intent" type="submit" value="draft">{pending === "draft" ? "Saving..." : "Save Draft Score"}</button><button className={styles.submitButton} disabled={pending !== null || completed} name="intent" type="submit" value="submit">{pending === "submit" ? "Submitting..." : completed ? "Review submitted" : <>Submit Final Review <Icon name="arrow" size={14} /></>}</button></div>
         {notice && <p className={`${styles.notice} ${Object.keys(errors).length > 0 ? styles.noticeError : ""}`} role={Object.keys(errors).length > 0 ? "alert" : "status"}><Icon name={Object.keys(errors).length > 0 ? "trophy" : "check"} size={14} /> {notice}</p>}
       </aside>
     </form>

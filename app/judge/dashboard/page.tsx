@@ -68,7 +68,7 @@ export default function JudgeDashboardPage() {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> JUDGE WORKSPACE</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Avery Morgan"><span className="profile-avatar">AM</span><span className="profile-name">Avery Morgan</span><span className="profile-chevron">⌄</span></button>
+            <button className="profile-button" type="button" aria-label="Account menu"><span className="profile-avatar">HF</span><span className="profile-name">My account</span><span className="profile-chevron">⌄</span></button>
           </div>
         </header>
         <main className={`dashboard-main ${styles.judgeMain}`}>

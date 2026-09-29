@@ -1,13 +1,14 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import pg from 'pg';
+import { DatabaseSync } from 'node:sqlite';
 
-const { Pool } = pg;
-const tables = ['users', 'events', 'tracks', 'criteria', 'teams', 'submissions', 'assignments', 'judgeTrackEligibility', 'judgingAssignments', 'scores'];
+const Pool = process.env.DATABASE_URL ? (await import('pg')).default.Pool : null;
+const tables = ['users', 'events', 'tracks', 'criteria', 'teams', 'submissions', 'assignments', 'judgeTrackEligibility', 'judgingAssignments', 'scores', 'registrations', 'invites', 'votes', 'comments', 'auditLogs'];
 const db = Object.fromEntries(tables.map(table => [table, []]));
-const dataFile = resolve(process.env.DATA_FILE || './data/db.json');
+const dataFile = resolve(process.env.DATA_FILE || './data/hackforge.sqlite');
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.PGSSL === 'disable' ? false : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined), max: Number(process.env.PGPOOL_MAX || 10), idleTimeoutMillis: 30000, connectionTimeoutMillis: 10000 }) : null;
+let sqlite;
 let activeClient;
 let localQueue = Promise.resolve();
 
@@ -21,7 +22,12 @@ export async function initializeStore() {
     console.log('Storage: PostgreSQL');
   } else {
     try {
-      const saved = JSON.parse(await readFile(dataFile, 'utf8'));
+      await mkdir(dirname(dataFile), { recursive: true });
+      sqlite = new DatabaseSync(dataFile);
+      sqlite.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS app_state (id INTEGER PRIMARY KEY CHECK (id = 1), value TEXT NOT NULL, updated_at TEXT NOT NULL)');
+      const row = sqlite.prepare('SELECT value FROM app_state WHERE id = 1').get();
+      if (!row) throw Object.assign(new Error('Database not seeded'), { code: 'ENOENT' });
+      const saved = JSON.parse(row.value);
       for (const table of tables) db[table] = Array.isArray(saved[table]) ? saved[table] : [];
       db.tracks ||= []; db.criteria ||= []; db.judgeTrackEligibility ||= []; db.judgingAssignments ||= [];
       for (const event of db.events) {
@@ -52,7 +58,7 @@ export async function initializeStore() {
       if (error.code !== 'ENOENT') throw error;
       await persistJson();
     }
-    console.log(`Storage: local JSON (${dataFile})`);
+    console.log(`Storage: local SQLite (${dataFile})`);
   }
 }
 
@@ -109,6 +115,10 @@ export async function runLocalSerial(callback) {
 }
 
 async function persistJson() {
+  if (sqlite) {
+    sqlite.prepare('INSERT INTO app_state(id,value,updated_at) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at').run(JSON.stringify(db), new Date().toISOString());
+    return;
+  }
   await mkdir(dirname(dataFile), { recursive: true });
   const temp = `${dataFile}.${process.pid}.tmp`;
   await writeFile(temp, JSON.stringify(db, null, 2), { mode: 0o600 });
@@ -150,6 +160,6 @@ export async function persist() {
   else await client.query('DELETE FROM rubric_criteria');
 }
 
-export function storageKind() { return pool ? 'postgres' : 'json'; }
-export async function closeStore() { if (pool) await pool.end(); }
+export function storageKind() { return pool ? 'postgres' : 'sqlite'; }
+export async function closeStore() { if (pool) await pool.end(); if (sqlite) sqlite.close(); }
 export { db };

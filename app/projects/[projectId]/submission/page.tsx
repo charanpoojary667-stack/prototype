@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getMockProject } from "../project-data";
-import SubmissionPanel from "./submission-panel";
+import SubmissionLoader from "./submission-loader";
 import styles from "./submission.module.css";
 
 type SubmissionPageProps = { params: Promise<{ projectId: string }> };
 
 export async function generateMetadata({ params }: SubmissionPageProps): Promise<Metadata> {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
-  return { title: project ? `Submit ${project.name} | HackForge` : "Submission status | HackForge", description: "Review your HackForge project submission status." };
+  return { title: "Project submission | HackForge", description: `Review submission status for project ${projectId}.` };
 }
 
 type IconName = "arrow" | "calendar" | "check" | "grid" | "people" | "settings" | "spark";
@@ -47,6 +45,5 @@ function MissingProject() {
 
 export default async function SubmissionPage({ params }: SubmissionPageProps) {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
-  return <div className="app-shell"><Sidebar /><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context"><span className="topbar-context-dot" /> SUBMISSION STATUS</div><button className="profile-button" type="button" aria-label="Account menu for Jordan Lee"><span className="profile-avatar">JL</span><span className="profile-name">Jordan Lee</span><span className="profile-chevron">⌄</span></button></div></header><main className={`dashboard-main ${styles.submissionMain}`}><Link className={styles.backLink} href={project ? `/projects/${project.id}/view` : "/"}><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12" /></svg>Back to Project</Link>{project ? <SubmissionPanel project={project} /> : <MissingProject />}<footer className={styles.submissionFooter}><span>HackForge <i /> Built for builders</span><Link href="/events/demo-event">DOGFOOD Hackathon <Icon name="arrow" size={14} /></Link></footer></main></div></div>;
+  return <div className="app-shell"><Sidebar /><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context"><span className="topbar-context-dot" /> SUBMISSION STATUS</div><button className="profile-button" type="button" aria-label="Signed-in account"><span className="profile-avatar">HF</span><span className="profile-name">HackForge</span></button></div></header><main className={`dashboard-main ${styles.submissionMain}`}><Link className={styles.backLink} href="/teams/demo-team">← Back to Team</Link><SubmissionLoader projectId={projectId} /><footer className={styles.submissionFooter}><span>HackForge <i /> Built for builders</span><Link href="/events/demo-event">DOGFOOD Hackathon <Icon name="arrow" size={14} /></Link></footer></main></div></div>;
 }

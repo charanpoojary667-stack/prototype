@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { EventCountdown, EventRegistration } from "./event-live";
 import styles from "./event.module.css";
+import { apiRequest } from "../../lib/api";
 
-export const metadata: Metadata = {
-  title: "DOGFOOD Hackathon — Fall 2026 | HackForge",
-  description: "Explore the DOGFOOD Hackathon: dates, tracks, prizes, and how to join.",
-};
+type EventData = { title: string; description: string; venue: string; startAt: string; endAt: string; registrationEndAt: string; submissionDeadline: string; teamCapacity: number; tracks: { id: string; name: string; description: string }[]; prizes: { name: string; value?: string; amount?: string }[]; rules: string[] };
 
 type IconName = "arrow" | "calendar" | "check" | "clock" | "globe" | "grid" | "leaf" | "people" | "settings" | "spark" | "trophy";
 
@@ -49,49 +50,6 @@ const navigation = [
   { label: "My Project", href: "/#my-project", icon: "spark" as const },
   { label: "Gallery", href: "/#gallery", icon: "globe" as const },
   { label: "Settings", href: "/#settings", icon: "settings" as const },
-];
-
-const schedule = [
-  { date: "OCT 09", day: "Friday", title: "Kickoff & team forming", detail: "Welcome, idea pitches, and opening ceremony" },
-  { date: "OCT 10", day: "Saturday", title: "Build day", detail: "Mentor sessions, workshops, and plenty of making" },
-  { date: "OCT 11", day: "Sunday", title: "Demo & celebration", detail: "Project showcase, judging, and prize announcements" },
-];
-
-const tracks = [
-  {
-    number: "01",
-    title: "Open source for everyone",
-    description: "Make tools that invite more people to learn, contribute, and create.",
-    icon: "spark" as const,
-    tone: "trackIcon--green",
-  },
-  {
-    number: "02",
-    title: "Community & civic tech",
-    description: "Build practical ideas that bring neighbors and local communities closer.",
-    icon: "people" as const,
-    tone: "trackIcon--coral",
-  },
-  {
-    number: "03",
-    title: "Climate & good futures",
-    description: "Explore hopeful, grounded ways to care for the places we share.",
-    icon: "leaf" as const,
-    tone: "trackIcon--blue",
-  },
-];
-
-const prizes = [
-  { place: "01", label: "Grand prize", amount: "$5,000", tone: "prizeFirst" },
-  { place: "02", label: "Open-source standout", amount: "$2,000", tone: "prizeSecond" },
-  { place: "03", label: "People’s choice", amount: "$1,000", tone: "prizeThird" },
-];
-
-const rules = [
-  "Teams can include 1–5 people. New teammates are welcome until kickoff.",
-  "Build during the event and share your work under an open-source license.",
-  "Submit your project and a short demo by Sunday, October 11 at 6:00 PM UTC.",
-  "Projects are reviewed for usefulness, craft, and how clearly they’re presented.",
 ];
 
 function Sidebar() {
@@ -147,6 +105,11 @@ function SectionHeading({
 }
 
 export default function DemoEventPage() {
+  const [event, setEvent] = useState<EventData | null>(null);
+  useEffect(() => { apiRequest<{ event: EventData }>("/api/events/demo-event").then(({ event: data }) => setEvent(data)); }, []);
+  if (!event) return <main className={`dashboard-main ${styles.eventMain}`}><p role="status">Loading event details…</p></main>;
+  const dateLabel = (date: string) => new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+  const schedule = [event.startAt, event.submissionDeadline, event.endAt].map((date, index) => ({ date: dateLabel(date).toUpperCase(), day: new Date(date).toLocaleDateString(undefined, { weekday: "long", timeZone: "UTC" }), title: ["Event kickoff", "Submission deadline", "Event closes"][index], detail: ["The event begins.", "Submit your team project by this time.", "The event concludes."][index] }));
   return (
     <div className="app-shell">
       <Sidebar />
@@ -154,9 +117,9 @@ export default function DemoEventPage() {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> EVENT DETAILS</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-              <span className="profile-avatar">JL</span>
-              <span className="profile-name">Jordan Lee</span>
+            <button className="profile-button" type="button" aria-label="Account menu">
+              <span className="profile-avatar">HF</span>
+              <span className="profile-name">My account</span>
               <span className="profile-chevron">⌄</span>
             </button>
           </div>
@@ -171,26 +134,20 @@ export default function DemoEventPage() {
           <section className={styles.eventHero} aria-labelledby="event-title">
             <div className={styles.heroCopy}>
               <div className={styles.heroEyebrow}><span /> OPEN SOURCE COMMUNITY HACKATHON</div>
-              <h1 id="event-title">DOGFOOD<br />Hackathon</h1>
-              <p className={styles.heroSeason}>Fall 2026 <i /> Build something that matters.</p>
-              <p>
-                Three days to turn a good idea into something real. Find your team,
-                make in the open, and show the world what you built.
-              </p>
+              <h1 id="event-title">{event.title}</h1>
+              <p className={styles.heroSeason}>{new Date(event.startAt).getUTCFullYear()} <i /> Build something that matters.</p>
+              <p>{event.description}</p>
               <div className={styles.heroMeta}>
-                <span><Icon name="calendar" size={16} /> October 9–11, 2026</span>
-                <span><Icon name="globe" size={16} /> Online · Open to all</span>
+                <span><Icon name="calendar" size={16} /> {dateLabel(event.startAt)}–{dateLabel(event.endAt)}, {new Date(event.startAt).getUTCFullYear()}</span>
+                <span><Icon name="globe" size={16} /> {event.venue}</span>
               </div>
             </div>
 
             <aside className={styles.joinPanel} aria-label="Registration and event countdown">
               <div className={styles.registrationBadge}><span /> REGISTRATION OPEN</div>
-              <p className={styles.countdownLabel}>KICKOFF IN</p>
-              <div className={styles.countdownValue}><strong>12</strong><span>days</span></div>
-              <p className={styles.deadline}><Icon name="clock" size={14} /> Register by Oct 8, 11:59 PM UTC</p>
-              <Link className={styles.joinButton} href="/signup">
-                Join Event <Icon name="arrow" size={16} />
-              </Link>
+              <EventCountdown />
+              <p className={styles.deadline}><Icon name="clock" size={14} /> Registration closes {new Date(event.registrationEndAt).toUTCString()}</p>
+              <EventRegistration />
               <p className={styles.joinNote}>Free to join · No experience required</p>
             </aside>
           </section>
@@ -215,12 +172,12 @@ export default function DemoEventPage() {
             <section className={styles.tracksSection} aria-labelledby="tracks-title">
               <SectionHeading eyebrow="PICK A DIRECTION" title="Tracks" titleId="tracks-title" />
               <div className={styles.trackList}>
-                {tracks.map((track) => (
-                  <article className={styles.trackCard} key={track.number}>
-                    <span className={`${styles.trackIcon} ${styles[track.tone]}`}><Icon name={track.icon} size={19} /></span>
+                {event.tracks.map((track, index) => (
+                  <article className={styles.trackCard} key={track.id}>
+                    <span className={`${styles.trackIcon} ${styles[["trackIcon--green", "trackIcon--coral", "trackIcon--blue"][index % 3]]}`}><Icon name={["spark", "people", "leaf"][index % 3] as "spark" | "people" | "leaf"} size={19} /></span>
                     <div className={styles.trackCopy}>
-                      <span className={styles.trackNumber}>TRACK {track.number}</span>
-                      <h3>{track.title}</h3>
+                      <span className={styles.trackNumber}>TRACK {String(index + 1).padStart(2, "0")}</span>
+                      <h3>{track.name}</h3>
                       <p>{track.description}</p>
                     </div>
                     <Icon name="arrow" size={16} />
@@ -233,11 +190,11 @@ export default function DemoEventPage() {
               <section className={styles.prizesSection} aria-labelledby="prizes-title">
                 <SectionHeading eyebrow="MAKE IT COUNT" title="Prizes" titleId="prizes-title" />
                 <div className={styles.prizeList}>
-                  {prizes.map((prize) => (
-                    <div className={styles.prizeRow} key={prize.place}>
-                      <span className={`${styles.prizePlace} ${styles[prize.tone]}`}>{prize.place}</span>
-                      <span className={styles.prizeName}>{prize.label}</span>
-                      <strong>{prize.amount}</strong>
+                  {event.prizes.map((prize, index) => (
+                    <div className={styles.prizeRow} key={`${prize.name}-${index}`}>
+                      <span className={`${styles.prizePlace} ${styles[["prizeFirst", "prizeSecond", "prizeThird"][index % 3]]}`}>{String(index + 1).padStart(2, "0")}</span>
+                      <span className={styles.prizeName}>{prize.name}</span>
+                      <strong>{prize.amount || prize.value}</strong>
                     </div>
                   ))}
                   <p className={styles.prizeNote}><Icon name="trophy" size={15} /> $8,000 in total prizes</p>
@@ -247,11 +204,11 @@ export default function DemoEventPage() {
               <section className={styles.rulesSection} aria-labelledby="rules-title">
                 <SectionHeading eyebrow="A FEW GOOD PRINCIPLES" title="Rules & highlights" titleId="rules-title" />
                 <ul>
-                  {rules.map((rule) => (
+                  {event.rules.map((rule) => (
                     <li key={rule}><span><Icon name="check" size={13} /></span>{rule}</li>
                   ))}
                 </ul>
-                <p className={styles.teamSize}><Icon name="people" size={15} /> Teams of 1–5 builders</p>
+                <p className={styles.teamSize}><Icon name="people" size={15} /> Teams of up to {event.teamCapacity} builders</p>
               </section>
             </div>
           </div>

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import ProjectDetailsForm from "./project-details-form";
-import { getMockProject } from "./project-data";
+import ProjectDetailsLoader from "./project-details-loader";
 import detailStyles from "./details.module.css";
 import projectStyles from "../new/project.module.css";
 
@@ -12,10 +11,9 @@ type ProjectPageProps = {
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
   return {
-    title: project ? `${project.name} | HackForge` : "Project not found | HackForge",
-    description: project?.tagline ?? "Project details for HackForge.",
+    title: `Project ${projectId} | HackForge`,
+    description: "Edit a HackForge project.",
   };
 }
 
@@ -99,7 +97,6 @@ function EmptyProjectState() {
 
 export default async function ProjectDetailsPage({ params }: ProjectPageProps) {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
 
   return (
     <div className="app-shell">
@@ -108,9 +105,9 @@ export default async function ProjectDetailsPage({ params }: ProjectPageProps) {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> PROJECT STUDIO</div>
-            <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-              <span className="profile-avatar">JL</span>
-              <span className="profile-name">Jordan Lee</span>
+            <button className="profile-button" type="button" aria-label="Account menu">
+              <span className="profile-avatar">HF</span>
+              <span className="profile-name">My account</span>
               <span className="profile-chevron">⌄</span>
             </button>
           </div>
@@ -121,21 +118,7 @@ export default async function ProjectDetailsPage({ params }: ProjectPageProps) {
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12" /></svg>
             Back to Dashboard
           </Link>
-          {project ? (
-            <>
-              <header className={`${projectStyles.pageHeading} ${detailStyles.detailsHeading}`}>
-                <div>
-                  <p className={projectStyles.pageEyebrow}><span /> DOGFOOD HACKATHON <i /> PROJECT PROFILE</p>
-                  <h1>Edit your project</h1>
-                  <p>Keep your team’s project details current as the idea takes shape.</p>
-                </div>
-                <span className={detailStyles.statusBadge}><i /> DRAFT SUBMISSION</span>
-              </header>
-              <ProjectDetailsForm project={project} />
-            </>
-          ) : (
-            <EmptyProjectState />
-          )}
+          <ProjectDetailsLoader projectId={projectId} />
           <footer className={projectStyles.pageFooter}>
             <span>HackForge <i /> Built for builders</span>
             <Link href="/events/demo-event">DOGFOOD Hackathon <Icon name="arrow" size={14} /></Link>

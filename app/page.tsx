@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import CountdownTimer from "./countdown-timer";
+import RecentProjects from "./recent-projects";
+import DashboardOverview from "./dashboard-overview";
+import HomeEventBanner from "./home-event-banner";
 
-const eventKickoff = "2026-10-09T00:00:00Z";
 
 type IconName =
   | "arrow"
@@ -60,36 +61,6 @@ const navigation = [
   { label: "Settings", href: "#settings", active: false, icon: "settings" as const },
 ];
 
-const projects = [
-  {
-    name: "OpenShelf",
-    category: "Civic tech",
-    description: "Making neighborhood sharing feel effortless.",
-    team: "Good Neighbors",
-    likes: 128,
-    artwork: "shelf",
-    mark: "O",
-  },
-  {
-    name: "Lumen",
-    category: "Climate",
-    description: "A clearer picture of your everyday footprint.",
-    team: "Soft Systems",
-    likes: 96,
-    artwork: "lumen",
-    mark: "L",
-  },
-  {
-    name: "Patchwork",
-    category: "Community",
-    description: "Small skills, shared locally, made useful.",
-    team: "Common Thread",
-    likes: 84,
-    artwork: "patchwork",
-    mark: "P",
-  },
-];
-
 function SectionHeading({
   eyebrow,
   title,
@@ -118,91 +89,6 @@ function SectionHeading({
   );
 }
 
-function EventBanner() {
-  return (
-    <section className="event-banner" id="events" aria-labelledby="event-title">
-      <div className="event-content">
-        <div className="event-kicker">
-          <span className="live-dot" /> OPEN FOR SUBMISSIONS
-          <span className="event-edition">FALL ’26</span>
-        </div>
-        <h2 id="event-title">DOGFOOD<br />Hackathon</h2>
-        <p className="event-description">
-          Build something you wish existed. Bring an idea, find your people, and
-          make it real.
-        </p>
-        <div className="event-details">
-          <span><Icon name="calendar" size={16} /> Oct 9–11, 2026</span>
-          <span><Icon name="users" size={16} /> 248 builders registered</span>
-        </div>
-        <Link href="#my-project" className="event-button">
-          View event details <Icon name="arrow" size={16} />
-        </Link>
-      </div>
-      <CountdownTimer targetDate={eventKickoff} />
-    </section>
-  );
-}
-
-function TeamCard() {
-  return (
-    <article className="summary-card team-card" id="my-team">
-      <div className="summary-card-top">
-        <span className="icon-tile icon-tile--green"><Icon name="users" size={19} /></span>
-        <span className="card-kicker">YOUR TEAM</span>
-        <Link href="#my-team" className="icon-link" aria-label="View your team"><Icon name="chevron" size={17} /></Link>
-      </div>
-      <h3>Pixel Pioneers</h3>
-      <p className="card-copy">Building together for DOGFOOD</p>
-      <div className="team-card-bottom">
-        <div className="avatar-stack" aria-label="Four team members">
-          <span className="mini-avatar mini-avatar--coral">JL</span>
-          <span className="mini-avatar mini-avatar--blue">MK</span>
-          <span className="mini-avatar mini-avatar--yellow">AS</span>
-          <span className="mini-avatar mini-avatar--lavender">+1</span>
-        </div>
-        <span className="member-count">4 <span>/ 5 members</span></span>
-      </div>
-    </article>
-  );
-}
-
-function ProjectCardSummary() {
-  return (
-    <article className="summary-card project-summary" id="my-project">
-      <div className="summary-card-top">
-        <span className="icon-tile icon-tile--peach"><Icon name="edit" size={19} /></span>
-        <span className="card-kicker">YOUR PROJECT</span>
-        <Link href="#my-project" className="icon-link" aria-label="Edit your project"><Icon name="chevron" size={17} /></Link>
-      </div>
-      <h3>CivicSignal</h3>
-      <p className="card-copy">A better way to be heard locally.</p>
-      <div className="project-progress-row">
-        <span>Project profile</span><strong>72%</strong>
-      </div>
-      <div className="progress-track"><span style={{ width: "72%" }} /></div>
-    </article>
-  );
-}
-
-function SubmissionCard() {
-  return (
-    <article className="summary-card submission-card">
-      <div className="summary-card-top">
-        <span className="icon-tile icon-tile--yellow"><Icon name="check" size={19} /></span>
-        <span className="card-kicker">SUBMISSION STATUS</span>
-        <span className="status-pill"><span /> IN PROGRESS</span>
-      </div>
-      <h3>Almost there.</h3>
-      <p className="card-copy">Your submission is saved as a draft.</p>
-      <div className="submission-deadline">
-        <Icon name="clock" size={15} /> Due Oct 11 at 6:00 PM
-        <Link href="#my-project" aria-label="Continue your submission"><Icon name="chevron" size={16} /></Link>
-      </div>
-    </article>
-  );
-}
-
 function QuickAction({
   label,
   icon,
@@ -220,25 +106,6 @@ function QuickAction({
       <span>{label}</span>
       <Icon name="chevron" size={16} />
     </Link>
-  );
-}
-
-function RecentProject({ project }: { project: (typeof projects)[number] }) {
-  return (
-    <article className="recent-project">
-      <div className={`project-art project-art--${project.artwork}`} role="img" aria-label={`${project.name} project preview`}>
-        <span className="art-mark">{project.mark}</span>
-        <span className="project-category">{project.category}</span>
-      </div>
-      <div className="project-info">
-        <div className="project-title-row">
-          <h3>{project.name}</h3>
-          <span className="project-likes"><span aria-hidden="true">♥</span> {project.likes}</span>
-        </div>
-        <p>{project.description}</p>
-        <div className="project-team"><span className="team-dot">{project.team.slice(0, 1)}</span> {project.team}</div>
-      </div>
-    </article>
   );
 }
 
@@ -266,10 +133,10 @@ function Sidebar() {
       </nav>
       <div className="sidebar-bottom">
         <div className="sidebar-event-note">
-          <div className="sidebar-event-label"><span className="live-dot" /> HAPPENING SOON</div>
-          <strong>DOGFOOD Hackathon</strong>
-          <span>Oct 9–11, 2026</span>
-          <Link href="#events">View event <Icon name="arrow" size={14} /></Link>
+          <div className="sidebar-event-label">EVENTS</div>
+          <strong>Find your next build</strong>
+          <span>Explore published events</span>
+          <Link href="#events">Browse events <Icon name="arrow" size={14} /></Link>
         </div>
         <span className="sidebar-version">HACKFORGE COMMUNITY <span>·</span> OPEN SOURCE</span>
       </div>
@@ -285,9 +152,9 @@ export default function Home() {
         <header className="topbar">
           <div className="topbar-inner">
             <div className="topbar-context"><span className="topbar-context-dot" /> PARTICIPANT WORKSPACE</div>
-          <button className="profile-button" type="button" aria-label="Account menu for Jordan Lee">
-            <span className="profile-avatar">JL</span>
-            <span className="profile-name">Jordan Lee</span>
+          <button className="profile-button" type="button" aria-label="Account menu">
+            <span className="profile-avatar">HF</span>
+            <span className="profile-name">My account</span>
             <span className="profile-chevron">⌄</span>
           </button>
           </div>
@@ -296,20 +163,16 @@ export default function Home() {
         <main className="dashboard-main">
         <section className="welcome-row" aria-labelledby="welcome-title">
           <div>
-            <p className="welcome-date"><span className="date-marker" /> SUNDAY, SEPTEMBER 27, 2026</p>
+            <p className="welcome-date"><span className="date-marker" /> HACKFORGE BUILDER WORKSPACE</p>
             <h1 id="welcome-title">Build. Submit. <span>Judge. Win.</span></h1>
             <p className="welcome-copy">Your next big idea starts with showing up.</p>
           </div>
           <Link href="#events" className="browse-events"><Icon name="sparkle" size={17} /> Browse events</Link>
         </section>
 
-        <EventBanner />
+        <HomeEventBanner />
 
-        <section className="overview-section" aria-label="Your hackathon overview">
-          <TeamCard />
-          <ProjectCardSummary />
-          <SubmissionCard />
-        </section>
+        <DashboardOverview />
 
         <section className="quick-section" aria-labelledby="quick-title">
           <SectionHeading eyebrow="MAKE YOUR NEXT MOVE" title="Quick actions" titleId="quick-title" />
@@ -323,9 +186,7 @@ export default function Home() {
 
         <section className="recent-section" id="gallery" aria-labelledby="recent-title">
           <SectionHeading eyebrow="FROM THE COMMUNITY" title="Recent projects" titleId="recent-title" href="#gallery" linkLabel="Explore gallery" />
-          <div className="recent-projects">
-            {projects.map((project) => <RecentProject key={project.name} project={project} />)}
-          </div>
+          <RecentProjects />
         </section>
 
         <footer className="dashboard-footer">

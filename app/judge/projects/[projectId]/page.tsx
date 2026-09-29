@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getMockProject } from "../../../projects/[projectId]/project-data";
-import JudgeReviewForm from "./judge-review-form";
+import JudgeReviewLoader from "./judge-review-loader";
 import styles from "./review.module.css";
 
 type JudgeReviewPageProps = { params: Promise<{ projectId: string }> };
 
 export async function generateMetadata({ params }: JudgeReviewPageProps): Promise<Metadata> {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
-  return { title: project ? `Review ${project.name} | HackForge` : "Review project | HackForge", description: "Complete a frontend preview of a HackForge project review." };
+  return { title: `Review project | HackForge`, description: `Review assigned HackForge project ${projectId}.` };
 }
 
 type IconName = "arrow" | "calendar" | "check" | "grid" | "people" | "settings" | "spark" | "trophy";
@@ -52,21 +50,16 @@ function Sidebar() {
   );
 }
 
-function MissingProject() {
-  return <section className={styles.emptyState} aria-labelledby="missing-project-title"><span><Icon name="trophy" size={22} /></span><p>PROJECT NOT FOUND</p><h1 id="missing-project-title">This review has no project attached.</h1><small>Return to the judge dashboard and choose an assigned project.</small><Link href="/judge/dashboard">Back to Judge Dashboard <Icon name="arrow" size={14} /></Link></section>;
-}
-
 export default async function JudgeReviewPage({ params }: JudgeReviewPageProps) {
   const { projectId } = await params;
-  const project = getMockProject(projectId);
   return (
     <div className="app-shell">
       <Sidebar />
       <div className="workspace-shell">
-        <header className="topbar"><div className="topbar-inner"><div className="topbar-context"><span className="topbar-context-dot" /> REVIEW CONSOLE</div><button className="profile-button" type="button" aria-label="Account menu for Avery Morgan"><span className="profile-avatar">AM</span><span className="profile-name">Avery Morgan</span><span className="profile-chevron">⌄</span></button></div></header>
+        <header className="topbar"><div className="topbar-inner"><div className="topbar-context"><span className="topbar-context-dot" /> REVIEW CONSOLE</div><button className="profile-button" type="button" aria-label="Account menu"><span className="profile-avatar">HF</span><span className="profile-name">My account</span><span className="profile-chevron">⌄</span></button></div></header>
         <main className={`dashboard-main ${styles.reviewMain}`}>
           <Link className={styles.backLink} href="/judge/dashboard"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12" /></svg>Back to Judge Dashboard</Link>
-          {project ? <JudgeReviewForm project={project} /> : <MissingProject />}
+          <JudgeReviewLoader projectId={projectId} />
           <footer className={styles.reviewFooter}><span>HackForge <i /> Built for builders</span><Link href="/events/demo-event">DOGFOOD Hackathon <Icon name="arrow" size={14} /></Link></footer>
         </main>
       </div>
