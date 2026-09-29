@@ -1,168 +1,79 @@
-# 🐶 DOGFOOD Hackathon
+# DOGFOOD Hackathon Judging Platform
 
-> **72-Hour Hackathon Project**  
-> Built during the **DOGFOOD Hackathon** organized by **Hackathon Raptors**.
+Backend API for running a hackathon: organizers create events and scoring rubrics, participants form teams and submit projects, and assigned judges score those projects. Local development uses a JSON file; deployed environments use PostgreSQL.
 
----
+## Run locally
 
-## 👥 Team
+Requires Node.js 20 or later.
 
-**Team Name:** It works on my machine
-
-| Member | Role |
-|--------|------|
-| Rudra Kamble  | Devloper - TL |
-| Shaurya R. Jamsandekar | Developer |
-| Mayuraj Mahadik | Developer |
-| Charan | Developer |
-
----
-
-## 📌 About
-
-This repository contains our submission for the **DOGFOOD Hackathon**, a **72-hour hackathon** where our team collaborated to design, develop, and present an innovative solution within a limited timeframe.
-
-The project demonstrates teamwork, rapid development, problem-solving, and modern software engineering practices.
-
----
-
-## 🎯 Objectives
-
-- Build a working solution within 72 hours.
-- Solve the provided problem statement.
-- Work efficiently as a team.
-- Deliver a polished prototype.
-- Present the project to judges.
-
----
-
-## 🚀 Features
-
-- ✅ Feature 1
-- ✅ Feature 2
-- ✅ Feature 3
-- ✅ Feature 4
-
-> Replace the above with your project's actual features.
-
----
-
-## 🛠 Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| Frontend | TBD |
-| Backend | TBD |
-| Database | TBD |
-| AI/ML | TBD |
-| APIs | TBD |
-| Deployment | TBD |
-
----
-
-## 📁 Project Structure
-
-```text
-.
-├── frontend/
-├── backend/
-├── assets/
-├── docs/
-├── README.md
-└── LICENSE
+```powershell
+cd backend
+npm.cmd install
+npm.cmd run dev
 ```
 
----
+The API listens on `http://localhost:4000`. Without `DATABASE_URL`, local development data is stored in `backend/data/db.json`. Set a random `JWT_SECRET` of at least 32 characters in production. Public registration creates participant accounts; organizer and judge accounts require invite codes.
 
-## ⚙️ Installation
+## Verify the full workflow
 
-Clone the repository.
-
-```bash
-git clone https://github.com/USERNAME/REPOSITORY.git
+```powershell
+cd backend
+npm.cmd run check:workflow
 ```
 
-Move into the project directory.
+The integration check starts a temporary API and data file, then verifies registration, login, event creation, rubric setup, judge assignment, team submission, scoring, and participant leaderboard access. It removes temporary data when finished.
 
-```bash
-cd REPOSITORY
+## PostgreSQL and deployment
+
+Production storage uses PostgreSQL tables with foreign keys, uniqueness and score constraints, and database transactions. Rubric criteria are normalized into `rubric_criteria`; tracks and judge eligibility use `tracks` and `judge_track_eligibility`; each submission/judge pair has a `judging_assignments` row, and `scores` references both that assignment and a criterion. The schema in `backend/db/schema.sql` creates the new structures and backfills existing event rubric JSON and score assignments. To run PostgreSQL and the API locally with Docker Compose, set `JWT_SECRET`, `ORGANIZER_INVITE_CODE`, and `JUDGE_INVITE_CODE` in your terminal environment, then run this from the repository root:
+
+```powershell
+docker compose -f backend/docker-compose.yml up --build
 ```
 
-Install dependencies.
+The API is then available at `http://localhost:4000/api/health`.
 
-```bash
-npm install
-```
+The root `render.yaml` provisions a Render web service and managed PostgreSQL database. Push this repository to GitHub, create a new Blueprint in Render, and select the repository. Render generates the token-signing and invite-code secrets; use the generated invite values from the service environment when registering organizer and judge accounts. The blueprint uses paid Render service and database plans; review pricing before creating resources. Deployment does not automatically move local JSON records into PostgreSQL, so production starts with a fresh database unless you explicitly migrate local data.
 
-Run the development server.
+The API serializes PostgreSQL transactions to preserve the current workflow safely across instances. This suits a small hackathon deployment; sustained higher traffic will need targeted database queries before scaling horizontally.
 
-```bash
-npm run dev
-```
+## Workflow
 
----
+1. Register an organizer, a judge, and participant accounts.
+2. Organizer creates an event, sets its rubric, assigns judges, then publishes it.
+3. Participants create teams and submit projects.
+4. Assigned judges score every rubric criterion and provide feedback.
+5. Organizer completes the event to reveal the participant leaderboard.
 
-## 📸 Screenshots
+All routes are under `/api`. Authenticated routes accept `Authorization: Bearer <token>`. Request and response bodies use JSON.
 
-Add screenshots of your application here.
+## Endpoints
 
-```
-assets/
-├── home.png
-├── dashboard.png
-└── demo.gif
-```
+| Method | Path | Access | Purpose |
+|---|---|---|---|
+| GET | `/api/health` | Public | Health check |
+| POST | `/api/auth/register` | Public | Register `{name,email,password,role?,inviteCode?}` |
+| POST | `/api/auth/login` | Public | Login `{email,password}` |
+| GET | `/api/auth/me` | Signed in | Current account |
+| GET, POST | `/api/events` | Signed in / organizer | List accessible events or create one |
+| GET, PATCH | `/api/events/:eventId` | Event member / organizer | Read or update event |
+| PUT | `/api/events/:eventId/rubric` | Organizer | Set rubric criteria while draft |
+| POST, GET | `/api/events/:eventId/tracks` | Organizer / event member | Create or list tracks; tracks may have their own rubric criteria |
+| POST | `/api/events/:eventId/judges` | Organizer | Assign judge by email |
+| POST | `/api/events/:eventId/tracks/:trackId/judges` | Organizer | Add a track-eligible event judge by email |
+| GET | `/api/events/:eventId/judging-assignments` | Organizer / assigned judge | List project-level judging assignments |
+| DELETE | `/api/events/:eventId/judges/:judgeId` | Organizer | Remove judge assignment |
+| POST | `/api/events/:eventId/publish` | Organizer | Publish event |
+| POST | `/api/events/:eventId/complete` | Organizer | Complete event and reveal participant leaderboard |
+| GET | `/api/events/:eventId/teams` | Event member | List teams |
+| GET | `/api/events/:eventId/submissions` | Organizer / assigned judge | List event submissions |
+| GET | `/api/events/:eventId/leaderboard` | Organizer / assigned judge; participants after completion | Ranked scores |
+| POST | `/api/teams` | Participant | Create a team |
+| POST | `/api/teams/:teamId/join` | Participant | Join a team (up to six members) |
+| POST | `/api/teams/:teamId/submissions` | Team member | Submit project details and links |
+| GET | `/api/submissions/:submissionId` | Team member / event staff | Read submission |
+| PUT | `/api/submissions/:submissionId/scores` | Assigned judge | Save a score and feedback per criterion |
+| GET | `/api/submissions/:submissionId/scores` | Organizer / assigned judge | Read scores and feedback |
+| PATCH | `/api/judging-assignments/:assignmentId` | Assigned judge / organizer | Change assignment state; completion requires all rubric scores |
 
----
-
-## 🎥 Demo
-
-Demo Video:
-
-```
-Add YouTube / Loom / Drive link here
-```
-
----
-
-## 📚 Documentation
-
-Project documentation and architecture diagrams are available inside the `docs/` directory.
-
----
-
-## 🤝 Contributors
-
-- Rudra
-- Shaurya R. Jamsandekar
-- Mayuraj
-- Charan
-
----
-
-## 📄 License
-
-This project is intended for educational and hackathon purposes.
-
----
-
-## 🙏 Acknowledgements
-
-Special thanks to:
-
-- Hackathon Raptors
-- Event mentors and judges
-- All volunteers and participants
-- Our teammates for their collaboration throughout the challenge
-
----
-
-## ⭐ Support
-
-If you found this project interesting, consider giving it a ⭐ on GitHub!
-
----
-
-<p align="center">
-Made with ❤️ during the <strong>DOGFOOD Hackathon 2026</strong>
-</p>
+Local JSON files are for development only. When `DATABASE_URL` is set, the API stores event, team, membership, submission, judge assignment, and score data in PostgreSQL.
