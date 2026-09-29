@@ -1,0 +1,574 @@
+.eventMain {
+  padding-top: 24px;
+  padding-bottom: 30px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  color: #6e7b71;
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+
+.backLink:hover,
+.pageFooter a:hover {
+  color: #274936;
+}
+
+.backLink svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.eventHero {
+  position: relative;
+  display: grid;
+  min-height: 315px;
+  grid-template-columns: minmax(0, 1fr) 255px;
+  align-items: center;
+  gap: 30px;
+  overflow: hidden;
+  padding: 28px 30px;
+  border-radius: 8px;
+  background-color: #183a31;
+  background-image:
+    linear-gradient(90deg, rgba(18, 49, 39, 0.97) 0%, rgba(18, 49, 39, 0.88) 47%, rgba(18, 49, 39, 0.52) 100%),
+    url("https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1600&q=85");
+  background-position: center, center 48%;
+  background-size: cover;
+  color: white;
+  animation: event-enter 450ms ease both;
+}
+
+.heroCopy {
+  max-width: 610px;
+}
+
+.heroEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 17px;
+  color: #dce8d8;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.heroEyebrow > span,
+.registrationBadge > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d4ee65;
+  box-shadow: 0 0 0 3px rgba(212, 238, 101, 0.16);
+}
+
+.heroEyebrow i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.heroCopy h1 {
+  margin: 0;
+  font-size: clamp(34px, 3.4vw, 46px);
+  font-weight: 620;
+  letter-spacing: 0;
+  line-height: 1.03;
+}
+
+.heroCopy > p {
+  max-width: 450px;
+  margin: 13px 0 0;
+  color: #d4dfd7;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.heroCopy > .heroSeason {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #e0e8d9;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.heroSeason i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 19px;
+}
+
+.heroMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #edf3e9;
+  font-size: 9px;
+}
+
+.heroMeta svg {
+  color: #d5e4c5;
+}
+
+.joinPanel {
+  padding: 16px 17px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: rgba(14, 39, 31, 0.68);
+  backdrop-filter: blur(10px);
+}
+
+.registrationBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e3ecd9;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+
+.registrationBadge > span {
+  width: 6px;
+  height: 6px;
+}
+
+.countdownLabel {
+  margin: 20px 0 4px;
+  color: #ccdbce;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.countdownValue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.countdownValue strong {
+  color: white;
+  font-size: 40px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.countdownValue span {
+  color: #d4dfd7;
+  font-size: 10px;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 13px;
+  color: #d8e3d9;
+  font-size: 8px;
+}
+
+.joinButton {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 4px;
+  background: #d4ee65;
+  color: #243821;
+  font-size: 10px;
+  font-weight: 750;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.joinButton:hover {
+  transform: translateY(-1px);
+  background: #e2f68c;
+}
+
+.joinNote {
+  margin: 9px 0 0;
+  color: rgba(232, 239, 231, 0.67);
+  text-align: center;
+  font-size: 8px;
+}
+
+.scheduleSection {
+  margin-top: 25px;
+}
+
+.sectionHeading {
+  margin-bottom: 11px;
+}
+
+.sectionHeading > p {
+  margin: 0 0 4px;
+  color: #7d897f;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: #1b2921;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scheduleCard {
+  display: grid;
+  min-height: 93px;
+  grid-template-columns: 47px 12px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 13px 12px;
+  border: 1px solid #e7eae4;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.scheduleDate span {
+  display: block;
+}
+
+.scheduleDate span:first-child {
+  color: #47644c;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+}
+
+.scheduleDate span:last-child {
+  margin-top: 4px;
+  color: #8a938b;
+  font-size: 8px;
+}
+
+.scheduleMarker {
+  position: relative;
+  display: flex;
+  min-height: 55px;
+  justify-content: center;
+}
+
+.scheduleMarker i {
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  margin-top: 2px;
+  border: 2px solid #85a35d;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.scheduleMarker > span {
+  position: absolute;
+  top: 9px;
+  bottom: -7px;
+  width: 1px;
+  background: #dfe7d8;
+}
+
+.scheduleDescription h3 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.scheduleDescription p {
+  margin: 5px 0 0;
+  color: #808b82;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+  align-items: start;
+  gap: 24px;
+  margin-top: 26px;
+}
+
+.trackList {
+  display: grid;
+  gap: 9px;
+}
+
+.trackCard {
+  display: grid;
+  min-height: 90px;
+  grid-template-columns: 36px minmax(0, 1fr) 16px;
+  align-items: start;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid #e7eae4;
+  border-radius: 6px;
+  background: #fff;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.trackCard:hover {
+  transform: translateY(-1px);
+  border-color: #d5ddd2;
+  box-shadow: 0 5px 15px rgba(31, 49, 37, 0.05);
+}
+
+.trackCard > svg {
+  margin-top: 9px;
+  color: #96a097;
+}
+
+.trackIcon {
+  display: inline-flex;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.trackIcon--green { background: #edf5d6; color: #516b30; }
+.trackIcon--coral { background: #fbe9e1; color: #a45f46; }
+.trackIcon--blue { background: #e5eff2; color: #426d78; }
+
+.trackNumber {
+  color: #889289;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.trackCopy h3 {
+  margin: 3px 0 0;
+  color: #25342a;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.trackCopy p {
+  margin: 5px 0 0;
+  color: #7d887f;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.sidebarDetails {
+  display: grid;
+  gap: 19px;
+}
+
+.prizeList,
+.rulesSection ul {
+  padding: 13px;
+  border: 1px solid #e7eae4;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.prizeRow {
+  display: grid;
+  min-height: 36px;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f0f2ed;
+}
+
+.prizePlace {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.prizeFirst { background: #f2edda; color: #8c7441; }
+.prizeSecond { background: #ecf0ee; color: #66736c; }
+.prizeThird { background: #f6e7dc; color: #9b6a4c; }
+
+.prizeName {
+  color: #58645b;
+  font-size: 9px;
+}
+
+.prizeRow strong {
+  color: #24382b;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.prizeNote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 11px 0 0;
+  color: #74816f;
+  font-size: 8px;
+}
+
+.rulesSection ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 13px;
+  list-style: none;
+}
+
+.rulesSection li {
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr);
+  gap: 8px;
+  color: #68756b;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.rulesSection li > span {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #edf4e5;
+  color: #607c4c;
+}
+
+.teamSize {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  color: #637160;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.pageFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 13px;
+  border-top: 1px solid #e5e9e1;
+  color: #8a938b;
+  font-size: 8px;
+}
+
+.pageFooter > span,
+.pageFooter a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pageFooter > span i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #a2aaa3;
+}
+
+.pageFooter a {
+  color: #607667;
+  transition: color 150ms ease;
+}
+
+@keyframes event-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1080px) {
+  .eventHero {
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .detailsGrid { grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr); gap: 17px; }
+  .scheduleGrid { gap: 8px; }
+  .scheduleCard { grid-template-columns: 42px 10px minmax(0, 1fr); gap: 7px; padding: 11px 9px; }
+}
+
+@media (max-width: 840px) {
+  .eventMain { padding-top: 19px; }
+  .eventHero { grid-template-columns: minmax(0, 1fr) 230px; min-height: 300px; }
+  .heroCopy h1 { font-size: 36px; }
+  .detailsGrid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .sidebarDetails { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 14px; }
+}
+
+@media (max-width: 620px) {
+  .eventMain { padding-top: 15px; padding-bottom: 21px; }
+  .backLink { margin-bottom: 12px; }
+  .eventHero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 19px;
+    padding: 21px 18px 17px;
+    background-position: center, 61% center;
+  }
+  .heroEyebrow { gap: 7px; font-size: 7px; }
+  .heroCopy h1 { font-size: 34px; }
+  .heroCopy > p { max-width: 410px; font-size: 10px; }
+  .heroMeta { gap: 12px; margin-top: 14px; }
+  .heroMeta span { font-size: 8px; }
+  .joinPanel { padding: 13px; }
+  .countdownLabel { margin-top: 13px; }
+  .countdownValue strong { font-size: 32px; }
+  .deadline { margin: 5px 0 10px; }
+  .joinNote { display: none; }
+  .scheduleSection { margin-top: 21px; }
+  .scheduleGrid { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .scheduleCard { min-height: 76px; grid-template-columns: 47px 12px minmax(0, 1fr); padding: 10px 11px; }
+  .scheduleMarker { min-height: 45px; }
+  .detailsGrid { margin-top: 22px; }
+  .sidebarDetails { grid-template-columns: minmax(0, 1fr); gap: 21px; }
+  .pageFooter { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventHero { animation: none; }
+  .backLink,
+  .joinButton,
+  .trackCard,
+  .pageFooter a { transition: none; }
+}

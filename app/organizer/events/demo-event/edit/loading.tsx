@@ -1,0 +1,6 @@
+import Link from "next/link";
+import styles from "./event-editor.module.css";
+
+export default function EventEditorLoading() {
+  return <div className="app-shell"><aside className="sidebar" aria-hidden="true"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Hack<span>Forge</span></span></Link><nav className="sidebar-nav"><span className="sidebar-link">Loading event management</span></nav></aside><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context">EVENT MANAGEMENT</div></div></header><main className={`dashboard-main ${styles.editorMain}`} aria-busy="true" aria-label="Loading event management"><div className={`${styles.loadingBar} ${styles.loadingBack}`} /><div className={`${styles.loadingBar} ${styles.loadingTitle}`} /><div className={`${styles.loadingBar} ${styles.loadingSubtitle}`} /><div className={styles.loadingLayout}><div className={styles.loadingForm}>{Array.from({ length: 7 }, (_, index) => <span className={styles.loadingBar} key={index} />)}</div><div className={styles.loadingAside}><span className={styles.loadingBar} /><span className={styles.loadingBar} /></div></div><span className={styles.visuallyHidden} role="status">Loading event management...</span></main></div></div>;
+}

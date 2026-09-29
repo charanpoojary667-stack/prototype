@@ -1,0 +1,6 @@
+import Link from "next/link";
+import styles from "./organizer.module.css";
+
+export default function OrganizerDashboardLoading() {
+  return <div className="app-shell"><aside className="sidebar" aria-hidden="true"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Hack<span>Forge</span></span></Link><nav className="sidebar-nav"><span className="sidebar-link">Loading organizer workspace</span></nav></aside><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context">ORGANIZER WORKSPACE</div></div></header><main className={`dashboard-main ${styles.organizerMain}`} aria-busy="true" aria-label="Loading organizer dashboard"><div className={`${styles.loadingBar} ${styles.loadingTitle}`} /><div className={`${styles.loadingBar} ${styles.loadingSubtitle}`} /><div className={styles.loadingBanner} /><div className={styles.loadingMetrics}>{Array.from({ length: 4 }, (_, index) => <span className={styles.loadingBar} key={index} />)}</div><div className={styles.loadingPanels}>{Array.from({ length: 2 }, (_, index) => <span className={styles.loadingPanel} key={index}><i className={styles.loadingBar} /><b className={styles.loadingBar} /></span>)}</div><span className={styles.visuallyHidden} role="status">Loading organizer dashboard...</span></main></div></div>;
+}

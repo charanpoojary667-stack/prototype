@@ -1,0 +1,6 @@
+import Link from "next/link";
+import styles from "./submission.module.css";
+
+export default function SubmissionLoading() {
+  return <div className="app-shell"><aside className="sidebar" aria-hidden="true"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Hack<span>Forge</span></span></Link><nav className="sidebar-nav"><span className="sidebar-link">Loading submission</span></nav></aside><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context">SUBMISSION STATUS</div></div></header><main className={`dashboard-main ${styles.submissionMain}`} aria-busy="true" aria-label="Loading submission status"><div className={`${styles.loadingBar} ${styles.loadingBack}`} /><div className={`${styles.loadingBar} ${styles.loadingTitle}`} /><div className={`${styles.loadingBar} ${styles.loadingSubtitle}`} /><div className={styles.loadingLayout}><div className={styles.loadingPrimary}><span className={styles.loadingBar} /><span className={styles.loadingBar} /><span className={styles.loadingBar} /></div><div className={styles.loadingSide}><span className={styles.loadingBar} /><span className={styles.loadingBar} /></div></div><span className={styles.visuallyHidden} role="status">Loading submission status...</span></main></div></div>;
+}

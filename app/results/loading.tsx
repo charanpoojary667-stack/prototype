@@ -1,0 +1,6 @@
+import Link from "next/link";
+import styles from "./results.module.css";
+
+export default function ResultsLoading() {
+  return <div className="app-shell"><aside className="sidebar" aria-hidden="true"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Hack<span>Forge</span></span></Link><nav className="sidebar-nav"><span className="sidebar-link">Loading results</span></nav></aside><div className="workspace-shell"><header className="topbar"><div className="topbar-inner"><div className="topbar-context">COMMUNITY RESULTS</div></div></header><main className={`dashboard-main ${styles.resultsMain}`} aria-busy="true" aria-label="Loading final results"><div className={`${styles.loadingBar} ${styles.loadingBack}`} /><div className={`${styles.loadingBar} ${styles.loadingTitle}`} /><div className={`${styles.loadingBar} ${styles.loadingSubtitle}`} /><div className={styles.loadingWinners}>{Array.from({ length: 3 }, (_, index) => <span className={styles.loadingWinner} key={index}><i className={styles.loadingBar} /><b className={styles.loadingBar} /></span>)}</div><span className={styles.visuallyHidden} role="status">Loading final results...</span></main></div></div>;
+}

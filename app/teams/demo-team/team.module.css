@@ -1,0 +1,639 @@
+.teamMain {
+  padding-top: 24px;
+  padding-bottom: 30px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 17px;
+  color: #6e7b71;
+  font-size: 10px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+
+.backLink:hover,
+.teamFooter a:hover,
+.eventPanel > a:hover {
+  color: #274936;
+}
+
+.backLink svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.teamHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 21px;
+}
+
+.teamEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: #79857b;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+}
+
+.teamEyebrow > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #83a55e;
+  box-shadow: 0 0 0 3px #edf3e5;
+}
+
+.teamEyebrow i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #a2aaa3;
+}
+
+.teamHeader h1 {
+  margin: 0;
+  color: #1a2920;
+  font-size: 32px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.teamDescription {
+  margin: 7px 0 0;
+  color: #7a857d;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.inviteMemberButton {
+  display: inline-flex;
+  min-height: 39px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid #183a31;
+  border-radius: 5px;
+  background: #183a31;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.inviteMemberButton:hover {
+  transform: translateY(-1px);
+  background: #244c3d;
+}
+
+.inviteMemberButton > span {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.teamOverview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 215px;
+  align-items: center;
+  gap: 24px;
+  padding: 19px 21px;
+  border: 1px solid #e4e9e0;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.overviewTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teamMark {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dce7d6;
+  border-radius: 7px;
+  background: #eef4e7;
+  color: #47633e;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.cardEyebrow {
+  display: block;
+  color: #88938a;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+}
+
+.overviewTitle h2 {
+  margin: 4px 0 0;
+  color: #24342a;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.overviewCopy > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0 0;
+  color: #838d85;
+  font-size: 9px;
+}
+
+.overviewCopy > p i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #a8b0a8;
+}
+
+.capacityPanel {
+  padding-left: 20px;
+  border-left: 1px solid #eef0eb;
+}
+
+.capacityText {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.capacityText > span {
+  color: #829087;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+}
+
+.capacityText strong {
+  color: #304936;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.capacityText strong i {
+  color: #9aa49a;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 450;
+}
+
+.capacityTrack {
+  height: 5px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #edf0e9;
+}
+
+.capacityTrack > span {
+  display: block;
+  width: 25%;
+  height: 100%;
+  border-radius: inherit;
+  background: #8eae66;
+}
+
+.capacityPanel > p {
+  margin: 6px 0 0;
+  color: #879288;
+  font-size: 8px;
+  text-align: right;
+}
+
+.teamLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  align-items: start;
+  gap: 17px;
+  margin-top: 21px;
+}
+
+.membersPanel,
+.invitePanel,
+.eventPanel {
+  border: 1px solid #e5e9e2;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.membersPanel {
+  min-height: 320px;
+  padding: 17px;
+}
+
+.panelHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.panelHeading h2 {
+  margin: 4px 0 0;
+  color: #25352a;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.memberCount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: #395443;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.memberCount > span {
+  color: #8d978e;
+  font-size: 7px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+
+.leaderCard {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border: 1px solid #ebeee8;
+  border-radius: 5px;
+  background: #fbfcfa;
+}
+
+.leaderAvatar,
+.memberAvatar {
+  position: relative;
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d9e4cf;
+  color: #315041;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.leaderAvatar > span {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #87a968;
+}
+
+.leaderInfo {
+  min-width: 0;
+}
+
+.leaderInfo h3 {
+  margin: 3px 0 0;
+  color: #27372d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.leaderInfo p {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: #818c83;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 5px 7px;
+  border-radius: 3px;
+  background: #eef3e7;
+  color: #58744a;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.otherMembers {
+  margin-top: 11px;
+}
+
+.emptyMembers {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px 20px;
+  border: 1px dashed #dfe5dc;
+  border-radius: 5px;
+  background: #fcfdfb;
+  text-align: center;
+}
+
+.emptyIcon {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #eef3e7;
+  color: #6d8757;
+}
+
+.emptyMembers h3 {
+  margin: 12px 0 0;
+  color: #334339;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.emptyMembers p {
+  max-width: 270px;
+  margin: 6px 0 0;
+  color: #828c84;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.openSlots {
+  margin-top: 11px;
+  color: #74856c;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+}
+
+.teamAside {
+  display: grid;
+  gap: 11px;
+}
+
+.invitePanel {
+  padding: 15px;
+  scroll-margin-top: 82px;
+}
+
+.inviteHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.inviteIcon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: #edf4e5;
+  color: #607b4d;
+}
+
+.inviteHeading h2 {
+  margin: 3px 0 0;
+  color: #27372d;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.invitePanel > p:not(.inviteFootnote) {
+  margin: 12px 0 13px;
+  color: #7d887f;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.inviteLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #818d83;
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.inviteInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 9px;
+  border: 1px solid #e1e6df;
+  border-radius: 4px;
+  outline: none;
+  background: #fafbf9;
+  color: #647368;
+  font: inherit;
+  font-size: 8px;
+}
+
+.inviteInput:focus {
+  border-color: #809775;
+  box-shadow: 0 0 0 3px rgba(118, 147, 110, 0.13);
+}
+
+.copyControl {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.copyButton {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dfe6d9;
+  border-radius: 4px;
+  background: #f2f6ed;
+  color: #3d5a42;
+  cursor: pointer;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.copyButton:hover {
+  border-color: #bdcfb5;
+  background: #eaf1e1;
+}
+
+.copyFeedback {
+  min-height: 12px;
+  color: #627857;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.inviteFootnote {
+  margin: 2px 0 0;
+  color: #929b93;
+  font-size: 8px;
+}
+
+.eventPanel {
+  padding: 14px 15px;
+}
+
+.eventPanel h2 {
+  margin: 6px 0 0;
+  color: #27372d;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.eventPanel > p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 9px 0 11px;
+  color: #78847b;
+  font-size: 8px;
+}
+
+.eventPanel > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #4c6a50;
+  font-size: 8px;
+  font-weight: 700;
+  transition: color 150ms ease;
+}
+
+.leaveButton {
+  display: flex;
+  min-height: 35px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11px;
+  border: 1px solid #e6e8e3;
+  border-radius: 4px;
+  background: transparent;
+  color: #929893;
+  font: inherit;
+  font-size: 9px;
+  cursor: not-allowed;
+}
+
+.leaveNote {
+  margin: -6px 1px 0;
+  color: #98a099;
+  font-size: 7px;
+}
+
+.teamFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e9e1;
+  color: #8a938b;
+  font-size: 8px;
+}
+
+.teamFooter > span,
+.teamFooter > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.teamFooter > span i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #a2aaa3;
+}
+
+.teamFooter > a {
+  color: #607667;
+  transition: color 150ms ease;
+}
+
+@media (max-width: 1080px) {
+  .teamLayout { grid-template-columns: minmax(0, 1fr) 265px; gap: 13px; }
+  .teamOverview { grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; padding: 17px; }
+}
+
+@media (max-width: 840px) {
+  .teamMain { padding-top: 19px; }
+  .teamLayout { grid-template-columns: minmax(0, 1fr) 280px; }
+}
+
+@media (max-width: 680px) {
+  .teamMain { padding-top: 15px; padding-bottom: 22px; }
+  .teamHeader { align-items: flex-start; flex-direction: column; gap: 14px; padding-bottom: 16px; }
+  .teamHeader h1 { font-size: 27px; }
+  .teamDescription { max-width: 430px; font-size: 10px; }
+  .inviteMemberButton { min-height: 36px; }
+  .teamOverview { grid-template-columns: minmax(0, 1fr); gap: 15px; padding: 14px; }
+  .capacityPanel { padding: 12px 0 0; border-top: 1px solid #eef0eb; border-left: 0; }
+  .teamLayout { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 14px; }
+  .membersPanel { min-height: 0; padding: 14px; }
+  .emptyMembers { min-height: 165px; padding: 20px 15px; }
+  .teamAside { gap: 10px; }
+  .invitePanel { padding: 14px; }
+  .teamFooter { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 370px) {
+  .teamEyebrow { font-size: 7px; }
+  .leaderCard { gap: 8px; padding: 9px; }
+  .leaderBadge { gap: 4px; padding: 4px 5px; font-size: 6px; }
+  .leaderInfo h3 { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backLink,
+  .inviteMemberButton,
+  .copyButton,
+  .teamFooter > a { transition: none; }
+}
