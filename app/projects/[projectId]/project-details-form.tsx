@@ -62,7 +62,7 @@ function TeamMember({
   );
 }
 
-export default function ProjectDetailsForm({ project }: { project: ProjectRecord }) {
+export default function ProjectDetailsForm({ project, eventSlug }: { project: ProjectRecord; eventSlug: string }) {
   const router = useRouter();
   const [tracks, setTracks] = useState<TrackOption[]>([]);
   const [name, setName] = useState(project.name);
@@ -80,10 +80,10 @@ export default function ProjectDetailsForm({ project }: { project: ProjectRecord
   const [pendingIntent, setPendingIntent] = useState<"draft" | "submit" | null>(null);
 
   useEffect(() => {
-    apiRequest<{ event: { tracks: { id: string; name: string }[] } }>("/api/events/demo-event")
+    apiRequest<{ event: { tracks: { id: string; name: string }[] } }>(`/api/events/${encodeURIComponent(eventSlug)}`)
       .then(({ event }) => setTracks(event.tracks.map((track, index) => ({ id: track.id, name: track.name, number: String(index + 1).padStart(2, "0"), tone: (["green", "coral", "blue"] as const)[index % 3] }))))
       .catch(() => setTracks([]));
-  }, []);
+  }, [eventSlug]);
 
   const checklistItems = [
     { label: "Project details", complete: Boolean(name.trim() && tagline.trim() && description.trim() && trackId) },
@@ -331,7 +331,7 @@ export default function ProjectDetailsForm({ project }: { project: ProjectRecord
               </span>
             ))}
           </div>
-          <Link href="/teams/demo-team" className={styles.teamLink}>View your team <Icon name="arrow" size={14} /></Link>
+          <Link href={`/teams/demo-team?eventId=${encodeURIComponent(eventSlug)}`} className={styles.teamLink}>View your team <Icon name="arrow" size={14} /></Link>
         </section>
         <p className={styles.previewNote}><span /> Changes are saved to your team’s local event project.</p>
       </aside>

@@ -72,7 +72,8 @@ function Sidebar() {
   );
 }
 
-export default function NewProjectPage() {
+export default async function NewProjectPage({ searchParams }: { searchParams: Promise<{ eventId?: string }> }) {
+  const eventId = (await searchParams).eventId || "demo-event";
   return (
     <div className="app-shell">
       <Sidebar />
@@ -102,7 +103,7 @@ export default function NewProjectPage() {
             <span className={styles.stepMark}><span>01</span> PROJECT PROFILE</span>
           </header>
 
-          <CreateProjectForm />
+          <CreateProjectForm eventId={eventId} />
 
           <footer className={styles.pageFooter}>
             <span>HackForge <i /> Built for builders</span>

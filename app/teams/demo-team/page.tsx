@@ -41,18 +41,17 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   );
 }
 
-const navigation = [
-  { label: "Dashboard", href: "/", icon: "grid" as const },
-  { label: "Events", href: "/events/demo-event", icon: "calendar" as const },
-  { label: "My Team", href: "/teams/demo-team", icon: "users" as const, active: true },
-  { label: "My Project", href: "/#my-project", icon: "spark" as const },
-  { label: "Gallery", href: "/#gallery", icon: "people" as const },
-  { label: "Settings", href: "/#settings", icon: "settings" as const },
-];
-
 const otherMembers: { id: string; name: string; role: string; initials: string }[] = [];
 
-function Sidebar() {
+function Sidebar({ eventId }: { eventId: string }) {
+  const navigation = [
+    { label: "Dashboard", href: "/", icon: "grid" as const },
+    { label: "Events", href: `/events/${eventId}`, icon: "calendar" as const },
+    { label: "My Team", href: `/teams/demo-team?eventId=${encodeURIComponent(eventId)}`, icon: "users" as const, active: true },
+    { label: "My Project", href: "/#my-project", icon: "spark" as const },
+    { label: "Gallery", href: "/#gallery", icon: "people" as const },
+    { label: "Settings", href: "/#settings", icon: "settings" as const },
+  ];
   return (
     <aside className="sidebar">
       <Link className="brand" href="/" aria-label="HackForge home">
@@ -79,7 +78,7 @@ function Sidebar() {
           <div className="sidebar-event-label"><span className="live-dot" /> HAPPENING SOON</div>
           <strong>DOGFOOD Hackathon</strong>
           <span>Oct 9–11, 2026</span>
-          <Link href="/events/demo-event">View event <Icon name="arrow" size={14} /></Link>
+          <Link href={`/events/${eventId}`}>View event <Icon name="arrow" size={14} /></Link>
         </div>
         <span className="sidebar-version">HACKFORGE COMMUNITY <span>·</span> OPEN SOURCE</span>
       </div>
@@ -133,10 +132,11 @@ function MemberList() {
   );
 }
 
-export default function DemoTeamPage() {
+export default async function DemoTeamPage({ searchParams }: { searchParams: Promise<{ eventId?: string }> }) {
+  const eventId = (await searchParams).eventId || "demo-event";
   return (
     <div className="app-shell">
-      <Sidebar />
+      <Sidebar eventId={eventId} />
       <div className="workspace-shell">
         <header className="topbar">
           <div className="topbar-inner">
@@ -152,7 +152,7 @@ export default function DemoTeamPage() {
         <main className={`dashboard-main ${styles.teamMain}`}>
           <Link className={styles.backLink} href="/events/demo-event">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12" /></svg>
-            Back to DOGFOOD Hackathon
+            Back to event
           </Link>
 
           <TeamWorkspace />

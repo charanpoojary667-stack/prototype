@@ -8,15 +8,17 @@ import styles from "./event.module.css";
 
 type EventDates = { registrationStartAt: string; registrationEndAt: string; startAt: string; submissionDeadline: string; endAt: string };
 
-export function EventCountdown() {
+export function EventCountdown({ slug = "demo-event" }: { slug?: string }) {
   const [event, setEvent] = useState<EventDates | null>(null);
+  const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(0);
   useEffect(() => {
-    apiRequest<{ event: EventDates }>("/api/events/demo-event").then(({ event: data }) => setEvent(data)).catch(() => setEvent(null));
+    let active = true;
+    apiRequest<{ event: EventDates }>(`/api/events/${encodeURIComponent(slug)}`).then(({ event: data }) => { if (active) { setEvent(data); setFailed(false); } }).catch(() => { if (active) { setEvent(null); setFailed(true); } });
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-  if (!event) return <p role="status">Loading live event dates…</p>;
+    return () => { active = false; window.clearInterval(timer); };
+  }, [slug]);
+  if (!event) return <p role={failed ? "alert" : "status"}>{failed ? "Live schedule is unavailable right now." : "Loading live event dates…"}</p>;
   let target = event.startAt;
   let label = "COUNTDOWN TO KICKOFF";
   if (now >= Date.parse(event.startAt) && now < Date.parse(event.registrationEndAt)) { target = event.registrationEndAt; label = "REGISTRATION CLOSES IN"; }
@@ -25,27 +27,29 @@ export function EventCountdown() {
   return <CountdownTimer targetDate={target} label={label} />;
 }
 
-export function EventRegistration() {
+export function EventRegistration({ slug = "demo-event", eventTitle = "this event" }: { slug?: string; eventTitle?: string }) {
   const [registered, setRegistered] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   useEffect(() => {
+    let active = true;
     apiRequest("/api/auth/me").then(() => {
-      setSignedIn(true);
-      return apiRequest<{ registered: boolean }>("/api/events/demo-event/register");
-    }).then(result => setRegistered(result.registered)).catch(() => setSignedIn(false));
-  }, []);
+      if (active) setSignedIn(true);
+      return apiRequest<{ registered: boolean }>(`/api/events/${encodeURIComponent(slug)}/register`);
+    }).then(result => { if (active) setRegistered(result.registered); }).catch(() => { if (active) setSignedIn(false); });
+    return () => { active = false; };
+  }, [slug]);
   async function register() {
     setPending(true); setMessage("");
     try {
-      await apiRequest("/api/events/demo-event/register", { method: "POST", body: apiBody({}) });
-      setRegistered(true); setMessage("You’re registered for DOGFOOD Hackathon.");
+      await apiRequest(`/api/events/${encodeURIComponent(slug)}/register`, { method: "POST", body: apiBody({}) });
+      setRegistered(true); setMessage(`You’re registered for ${eventTitle}.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Registration could not be completed."); }
     finally { setPending(false); }
   }
   return <>
-    {registered ? <p className={styles.joinNote} role="status">You’re registered. Create your team to get started.</p> : signedIn
+    {registered ? <p className={styles.joinNote} role="status">You’re registered. <Link href={`/teams/demo-team?eventId=${encodeURIComponent(slug)}`}>Create or join your team</Link>.</p> : signedIn
       ? <button className={styles.joinButton} disabled={pending} onClick={register} type="button">{pending ? "Registering…" : "Join Event"}</button>
       : <Link className={styles.joinButton} href="/login">Sign in to join</Link>}
     {message && <p className={styles.joinNote} role="status">{message}</p>}

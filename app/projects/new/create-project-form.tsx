@@ -43,8 +43,9 @@ function validateUrl(value: string, label: string) {
   }
 }
 
-export default function CreateProjectForm() {
+export default function CreateProjectForm({ eventId }: { eventId: string }) {
   const router = useRouter();
+  const [eventTitle, setEventTitle] = useState("DOGFOOD HACKATHON");
   const [tracks, setTracks] = useState<TrackOption[]>([]);
   const [team, setTeam] = useState<TeamSummary | null>(null);
   const [projectName, setProjectName] = useState("");
@@ -59,13 +60,14 @@ export default function CreateProjectForm() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    Promise.all([apiRequest<{ event: { tracks: { id: string; name: string; description: string }[] } }>("/api/events/demo-event"), apiRequest<{ teams: TeamSummary[] }>("/api/teams?eventId=demo-event")])
+    Promise.all([apiRequest<{ event: { title: string; tracks: { id: string; name: string; description: string }[] } }>(`/api/events/${encodeURIComponent(eventId)}`), apiRequest<{ teams: TeamSummary[] }>(`/api/teams?eventId=${encodeURIComponent(eventId)}`)])
       .then(([result, teamResult]) => {
+        setEventTitle(result.event.title);
         setTracks(result.event.tracks.map((track, index) => ({ id: track.id, number: String(index + 1).padStart(2, "0"), name: track.name, detail: track.description, color: (["green", "coral", "blue"] as const)[index % 3] })));
         setTeam(teamResult.teams[0] || null);
       })
       .catch((error: unknown) => setFeedback(error instanceof Error ? error.message : "Event or team data could not be loaded."));
-  }, []);
+  }, [eventId]);
 
   function addTag() {
     const nextTag = tagInput.trim().replace(/,$/, "");
@@ -117,7 +119,7 @@ export default function CreateProjectForm() {
     setPending(true);
     try {
       const result = await apiRequest<{ project: { id: string } }>("/api/projects", { method: "POST", body: apiBody({
-        eventId: "demo-event", title: name, tagline: nextTagline, summary: nextDescription,
+        eventId, title: name, tagline: nextTagline, summary: nextDescription,
         trackId: selectedTrack || null, tags, repositoryUrl: githubUrl, demoUrl,
       }) });
       if (intent === "create") await apiRequest(`/api/projects/${result.project.id}/submit`, { method: "POST", body: apiBody({}) });
@@ -301,7 +303,7 @@ export default function CreateProjectForm() {
           <div className={styles.asideHeading}><span>LIVE PREVIEW</span><span className={styles.previewPulse} /></div>
           <div className={styles.previewArtwork}>
             <span className={styles.artworkStamp}>HF<br />26</span>
-            <span className={styles.artworkLabel}>DOGFOOD / FALL 2026</span>
+            <span className={styles.artworkLabel}>{eventTitle} / PROJECT</span>
             <span className={styles.artworkShape} aria-hidden="true" />
           </div>
           <div className={styles.previewContent}>
@@ -323,7 +325,7 @@ export default function CreateProjectForm() {
             {team && team.members.length > 3 && <span className={styles.memberMore}>+{team.members.length - 3}</span>}
             <span className={styles.memberCount}>{team?.memberIds.length || 0} <i>/ 5 members</i></span>
           </div>
-          <Link href="/teams/demo-team" className={styles.teamLink}>View team <Icon name="arrow" size={14} /></Link>
+          <Link href={`/teams/demo-team?eventId=${encodeURIComponent(eventId)}`} className={styles.teamLink}>View team <Icon name="arrow" size={14} /></Link>
         </section>
 
         <p className={styles.previewNote}><span /> Drafts and submissions are saved to the local event database.</p>

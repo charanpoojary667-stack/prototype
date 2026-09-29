@@ -57,7 +57,7 @@ function GlobalNavigation({ pathname }: { pathname: string }) {
 
 export default function AppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const showNavigation = pathname !== "/login" && pathname !== "/signup";
+  const showNavigation = pathname !== "/" && pathname !== "/login" && pathname !== "/signup";
 
   return <div className={showNavigation ? "site-frame" : "site-frame site-frame--public"}>{showNavigation && <GlobalNavigation pathname={pathname} />}<div className="app-content">{children}</div></div>;
 }

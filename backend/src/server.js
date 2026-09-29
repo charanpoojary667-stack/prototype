@@ -22,8 +22,78 @@ async function hashPassword(password, salt = randomBytes(16).toString('hex')) {
   const derived = await scrypt(password, salt, 64);
   return `${salt}:${derived.toString('hex')}`;
 }
+async function upgradeExistingDemoData() {
+  const event = db.events.find(item => item.slug === 'demo-event' || item.title === 'DOGFOOD Hackathon');
+  if (!event || db.events.some(item => item.slug === 'open-build-weekend')) return;
+  event.resultsPublic = true;
+  const createdAt = now();
+  const organizer = db.users.find(user => user.id === event.organizerId) || db.users.find(user => user.role === 'organizer');
+  const judges = db.users.filter(user => user.role === 'judge').slice(0, 2);
+  if (!organizer || !judges.length) return;
+  const demoPassword = process.env.DEMO_PASSWORD || 'HackForge26!';
+  const participants = db.users.filter(user => user.role === 'participant');
+  for (const [name, email] of [['Nadia Okafor', 'nadia@example.com'], ['Eli Thompson', 'eli@example.com'], ['Riley Brooks', 'riley@example.com']]) {
+    let person = db.users.find(user => user.email === email);
+    if (!person) { person = { id: id(), name, email, role: 'participant', passwordHash: await hashPassword(demoPassword), createdAt }; db.users.push(person); }
+    if (!participants.some(user => user.id === person.id)) participants.push(person);
+  }
+  const eventId = id();
+  const showcase = {
+    id: eventId, slug: 'open-build-weekend', organizerId: organizer.id, title: 'Open Build Weekend',
+    description: 'A welcoming weekend for practical open-source tools, accessible design, and resilient communities.',
+    venue: 'Online · Global', status: 'published', registrationStartAt: '2026-09-10T00:00:00.000Z',
+    registrationEndAt: '2026-10-22T23:59:00.000Z', startAt: '2026-10-23T00:00:00.000Z',
+    submissionDeadline: '2026-10-25T18:00:00.000Z', judgingStartAt: '2026-10-25T18:00:00.000Z',
+    endAt: '2026-10-25T23:59:00.000Z', judgingEndAt: '2026-10-26T12:00:00.000Z',
+    resultsPublic: false, votingEnabled: true, teamCapacity: 4,
+    rules: ['Build something new during the event.', 'Use open tools and credit your collaborators.', 'Share a repository or demo with your submission.'],
+    prizes: [{ name: 'Open Source Impact', value: '$1,500' }, { name: 'People’s Choice', value: '$500' }], rubric: [], createdAt, updatedAt: createdAt,
+  };
+  db.events.push(showcase);
+  const tracks = [['Accessible by Design', 'Make useful experiences work for more people.'], ['Climate Tools', 'Build for a more resilient future.'], ['Civic Technology', 'Give communities better ways to participate.']]
+    .map(([name, description]) => ({ id: id(), eventId, name, description, createdAt }));
+  db.tracks.push(...tracks);
+  const criteria = [['Usefulness', 10, 35], ['Craft', 10, 25], ['Accessibility', 10, 25], ['Clarity', 10, 15]]
+    .map(([name, maxScore, weight], position) => ({ id: id(), eventId, trackId: null, name, description: `${name} of the solution and its fit for the people it serves.`, maxScore, weight, position }));
+  db.criteria.push(...criteria);
+  showcase.rubric = criteria.map(({ id: criterionId, name, description, maxScore, weight }) => ({ id: criterionId, name, description, maxScore, weight }));
+  const definitions = [
+    ['CaptionKit', 'Live captions that stay readable in the real world.', 'Accessible by Design', ['Accessibility', 'Speech', 'Web']],
+    ['Canopy', 'A neighborhood tree map that helps residents plan together.', 'Climate Tools', ['Climate', 'Maps', 'Community data']],
+    ['CivicPatch', 'Small, clear steps for turning local feedback into action.', 'Civic Technology', ['Civic tech', 'Open data', 'Workflow']],
+  ];
+  const projects = [];
+  for (const [index, [title, tagline, trackName, tags]] of definitions.entries()) {
+    let team = db.teams.find(item => item.eventId === eventId && item.name === ['Access Lab', 'Canopy Works', 'Common Ground'][index]);
+    if (!team) {
+      const person = participants[index % participants.length];
+      team = { id: id(), eventId, name: ['Access Lab', 'Canopy Works', 'Common Ground'][index], memberIds: [person.id], createdBy: person.id, createdAt };
+      db.teams.push(team);
+      if (!db.registrations.some(row => row.eventId === eventId && row.userId === person.id)) db.registrations.push({ id: id(), eventId, userId: person.id, createdAt });
+    }
+    let project = db.submissions.find(item => item.teamId === team.id);
+    if (!project) {
+      project = { id: id(), teamId: team.id, trackId: tracks.find(track => track.name === trackName).id, title, tagline, summary: `${tagline} Designed and prototyped by ${team.name} for Open Build Weekend.`, tags, repositoryUrl: '', demoUrl: '', status: 'SUBMITTED', createdAt, updatedAt: createdAt, submittedAt: createdAt };
+      db.submissions.push(project);
+    }
+    projects.push(project);
+  }
+  for (const judge of judges) {
+    db.assignments.push({ id: id(), eventId, judgeId: judge.id, createdAt });
+    for (const [projectIndex, project] of projects.entries()) {
+      const assignment = ensureJudgingAssignment(project, showcase, judge.id);
+      if (judge.id === judges[0].id && !db.scores.some(score => score.judgingAssignmentId === assignment.id)) {
+        for (const [criterionIndex, criterion] of criteria.entries()) db.scores.push({ id: id(), submissionId: project.id, eventId, judgeId: judge.id, judgingAssignmentId: assignment.id, criterionId: criterion.id, score: 8 + ((projectIndex + criterionIndex) % 3), feedback: 'A thoughtful prototype with a clear use case and room to grow.', updatedAt: createdAt });
+        assignment.status = 'completed'; assignment.startedAt = createdAt; assignment.completedAt = createdAt;
+      }
+    }
+  }
+  if (projects[0] && judges[1]) db.comments.push({ id: id(), projectId: projects[0].id, userId: judges[1].id, body: 'The accessibility details are unusually clear and practical.', createdAt });
+  if (projects[1] && participants[0]) db.votes.push({ id: id(), projectId: projects[1].id, userId: participants[0].id, createdAt });
+  await persist();
+}
 async function seedStore() {
-  if (db.users.length) return;
+  if (db.users.length) { await upgradeExistingDemoData(); return; }
   const createdAt = now();
   const demoPassword = process.env.DEMO_PASSWORD || 'HackForge26!';
   const accounts = [
@@ -43,7 +113,7 @@ async function seedStore() {
     registrationEndAt: '2026-10-08T23:59:00.000Z', startAt: '2026-10-09T00:00:00.000Z',
     submissionDeadline: '2026-10-11T18:00:00.000Z', judgingStartAt: '2026-10-11T18:00:00.000Z',
     endAt: '2026-10-11T23:59:00.000Z', judgingEndAt: '2026-10-12T12:00:00.000Z',
-    resultsPublic: false, votingEnabled: true, teamCapacity: 5,
+    resultsPublic: true, votingEnabled: true, teamCapacity: 5,
     rules: ['Be kind and build in the open.', 'Submit original work created during the event.', 'Include a working repository or demo link.'],
     prizes: [{ name: 'Grand Prize', value: '$2,500' }, { name: 'Community Choice', value: '$1,000' }],
     rubric: [], createdAt, updatedAt: createdAt,
@@ -75,19 +145,74 @@ async function seedStore() {
   ];
   for (const [title, tagline, trackName, team, tags, status] of demoProjects) {
     const track = tracks.find(item => item.name === trackName);
-    db.submissions.push({ id: id(), teamId: team.id, trackId: track.id, title, tagline, summary: `${tagline} Built by ${team.name} during DOGFOOD Hackathon.`, tags, repositoryUrl: 'https://github.com/example/hackforge-demo', demoUrl: 'https://example.com', status, createdAt, updatedAt: createdAt, submittedAt: createdAt });
+    db.submissions.push({ id: id(), teamId: team.id, trackId: track.id, title, tagline, summary: `${tagline} Built by ${team.name} during DOGFOOD Hackathon.`, tags, repositoryUrl: '', demoUrl: '', status, createdAt, updatedAt: createdAt, submittedAt: createdAt });
   }
   db.assignments.push(...[judge, judge2].map(item => ({ id: id(), eventId, judgeId: item.id, createdAt })));
   for (const submission of db.submissions) {
     const assignment = ensureJudgingAssignment(submission, event, judge.id);
-    if (submission.id === db.submissions[0].id) {
-      for (const criterion of criteria) db.scores.push({ id: id(), submissionId: submission.id, eventId, judgeId: judge.id, judgingAssignmentId: assignment.id, criterionId: criterion.id, score: 8, feedback: 'A promising, well considered idea.', updatedAt: createdAt });
-      assignment.status = 'completed'; assignment.startedAt = createdAt; assignment.completedAt = createdAt;
-    }
+    for (const [criterionIndex, criterion] of criteria.entries()) db.scores.push({ id: id(), submissionId: submission.id, eventId, judgeId: judge.id, judgingAssignmentId: assignment.id, criterionId: criterion.id, score: submission.id === db.submissions[0].id ? 8 : 7 + ((db.submissions.indexOf(submission) + criterionIndex) % 3), feedback: submission.id === db.submissions[0].id ? 'A promising, well considered idea.' : 'A clear prototype with thoughtful potential for community impact.', updatedAt: createdAt });
+    assignment.status = 'completed'; assignment.startedAt = createdAt; assignment.completedAt = createdAt;
   }
   const comment = { id: id(), projectId: db.submissions[0].id, userId: judge2.id, body: 'Clear problem framing and a thoughtful community-first direction.', createdAt };
   db.comments.push(comment);
   db.votes.push({ id: id(), projectId: db.submissions[1].id, userId: participant.id, createdAt });
+
+  // A second published event and a broader gallery make a fresh local install useful
+  // for both participant workflows and the public showcase.
+  const eventTwoId = id();
+  const eventTwo = {
+    id: eventTwoId, slug: 'open-build-weekend', organizerId: organizer.id, title: 'Open Build Weekend',
+    description: 'A welcoming weekend for practical open-source tools, accessible design, and resilient communities.',
+    venue: 'Online · Global', status: 'published', registrationStartAt: '2026-09-10T00:00:00.000Z',
+    registrationEndAt: '2026-10-22T23:59:00.000Z', startAt: '2026-10-23T00:00:00.000Z',
+    submissionDeadline: '2026-10-25T18:00:00.000Z', judgingStartAt: '2026-10-25T18:00:00.000Z',
+    endAt: '2026-10-25T23:59:00.000Z', judgingEndAt: '2026-10-26T12:00:00.000Z',
+    resultsPublic: false, votingEnabled: true, teamCapacity: 4,
+    rules: ['Build something new during the event.', 'Use open tools and credit your collaborators.', 'Share a repository or demo with your submission.'],
+    prizes: [{ name: 'Open Source Impact', value: '$1,500' }, { name: 'People’s Choice', value: '$500' }],
+    rubric: [], createdAt, updatedAt: createdAt,
+  };
+  db.events.push(eventTwo);
+  const secondTracks = [['Accessible by Design', 'Make useful experiences work for more people.'], ['Climate Tools', 'Build for a more resilient future.'], ['Civic Technology', 'Give communities better ways to participate.']]
+    .map(([name, description]) => ({ id: id(), eventId: eventTwoId, name, description, createdAt }));
+  db.tracks.push(...secondTracks);
+  const secondCriteria = [['Usefulness', 10, 35], ['Craft', 10, 25], ['Accessibility', 10, 25], ['Clarity', 10, 15]]
+    .map(([name, maxScore, weight], position) => ({ id: id(), eventId: eventTwoId, trackId: null, name, description: `${name} of the solution and its fit for the people it serves.`, maxScore, weight, position }));
+  db.criteria.push(...secondCriteria);
+  eventTwo.rubric = secondCriteria.map(({ id: criterionId, name, description, maxScore, weight }) => ({ id: criterionId, name, description, maxScore, weight }));
+  const extraPeople = [
+    { id: id(), name: 'Nadia Okafor', email: 'nadia@example.com', role: 'participant', passwordHash: await hashPassword(demoPassword), createdAt },
+    { id: id(), name: 'Eli Thompson', email: 'eli@example.com', role: 'participant', passwordHash: await hashPassword(demoPassword), createdAt },
+  ];
+  db.users.push(...extraPeople);
+  const secondTeams = [
+    { id: id(), eventId: eventTwoId, name: 'Access Lab', memberIds: [extraPeople[0].id], createdBy: extraPeople[0].id, createdAt },
+    { id: id(), eventId: eventTwoId, name: 'Canopy Works', memberIds: [extraPeople[1].id], createdBy: extraPeople[1].id, createdAt },
+    { id: id(), eventId: eventTwoId, name: 'Common Ground', memberIds: [secondParticipant.id], createdBy: secondParticipant.id, createdAt },
+  ];
+  db.teams.push(...secondTeams);
+  for (const person of extraPeople) db.registrations.push({ id: id(), eventId: eventTwoId, userId: person.id, createdAt });
+  db.registrations.push({ id: id(), eventId: eventTwoId, userId: secondParticipant.id, createdAt });
+  const moreProjects = [
+    ['CaptionKit', 'Live captions that stay readable in the real world.', 'Accessible by Design', secondTeams[0], ['Accessibility', 'Speech', 'Web'] ],
+    ['Canopy', 'A neighborhood tree map that helps residents plan together.', 'Climate Tools', secondTeams[1], ['Climate', 'Maps', 'Community data'] ],
+    ['CivicPatch', 'Small, clear steps for turning local feedback into action.', 'Civic Technology', secondTeams[2], ['Civic tech', 'Open data', 'Workflow'] ],
+  ];
+  const extraSubmissions = moreProjects.map(([title, tagline, trackName, team, tags]) => ({
+    id: id(), teamId: team.id, trackId: secondTracks.find(track => track.name === trackName).id,
+    title, tagline, summary: `${tagline} Designed and prototyped by ${team.name} for Open Build Weekend.`, tags,
+    repositoryUrl: '', demoUrl: '', status: 'SUBMITTED',
+    createdAt, updatedAt: createdAt, submittedAt: createdAt,
+  }));
+  db.submissions.push(...extraSubmissions);
+  db.assignments.push(...[judge, judge2].map(person => ({ id: id(), eventId: eventTwoId, judgeId: person.id, createdAt })));
+  for (const [submissionIndex, submission] of extraSubmissions.entries()) {
+    const assignment = ensureJudgingAssignment(submission, eventTwo, judge.id);
+    for (const [criterionIndex, criterion] of secondCriteria.entries()) db.scores.push({ id: id(), submissionId: submission.id, eventId: eventTwoId, judgeId: judge.id, judgingAssignmentId: assignment.id, criterionId: criterion.id, score: 8 + ((submissionIndex + criterionIndex) % 3), feedback: 'A thoughtful prototype with a clear use case and room to grow.', updatedAt: createdAt });
+    assignment.status = 'completed'; assignment.startedAt = createdAt; assignment.completedAt = createdAt;
+  }
+  db.comments.push({ id: id(), projectId: extraSubmissions[0].id, userId: judge2.id, body: 'The accessibility details are unusually clear and practical.', createdAt });
+  db.votes.push({ id: id(), projectId: extraSubmissions[1].id, userId: participant.id, createdAt });
   audit(organizer, 'seed.created', 'event', eventId);
   await persist();
 }
@@ -144,7 +269,7 @@ function authenticate(req) {
   return user;
 }
 function allow(user, ...roles) { if (!roles.includes(user.role) && !(user.role === 'admin' && roles.includes('organizer'))) throw fail(403, 'You do not have permission to perform this action'); }
-function eventOr404(eventId) { const event = db.events.find(item => item.id === eventId || (eventId === 'demo-event' && item.slug === 'demo-event')); if (!event) throw fail(404, 'Event not found'); return event; }
+function eventOr404(eventId) { const event = db.events.find(item => item.id === eventId || item.slug === eventId); if (!event) throw fail(404, 'Event not found'); return event; }
 function teamOr404(teamId) { const team = db.teams.find(item => item.id === teamId); if (!team) throw fail(404, 'Team not found'); return team; }
 function isMember(user, team) { return team.memberIds.includes(user.id); }
 function isEventOrganizer(user, event) { return user.role === 'admin' || (user.role === 'organizer' && event.organizerId === user.id); }
@@ -214,7 +339,7 @@ function projectView(submission) {
     tags: submission.tags || [],
     track: db.tracks.find(item => item.id === submission.trackId)?.name || 'General',
     team: team ? publicTeam(team) : null,
-    event: event ? { id: event.id, title: event.title, votingEnabled: Boolean(event.votingEnabled), resultsPublic: Boolean(event.resultsPublic) } : null,
+    event: event ? { id: event.id, slug: event.slug, title: event.title, submissionDeadline: event.submissionDeadline, teamCapacity: event.teamCapacity, votingEnabled: Boolean(event.votingEnabled), resultsPublic: Boolean(event.resultsPublic) } : null,
   };
 }
 async function body(req) {
@@ -268,6 +393,15 @@ async function route(req, res) {
   if (method === 'OPTIONS') { res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS', 'access-control-allow-headers': 'Content-Type,Authorization' }); return res.end(); }
   if (method === 'GET' && path === '/api/health') return send(res, 200, { status: 'ok', timestamp: now() });
 
+  if (method === 'GET' && path === '/api/platform/stats') {
+    const events = db.events.filter(event => event.status === 'published');
+    const eventIds = new Set(events.map(event => event.id));
+    const teams = db.teams.filter(team => eventIds.has(team.eventId));
+    const projectCount = db.submissions.filter(project => project.status === 'SUBMITTED' && teams.some(team => team.id === project.teamId)).length;
+    const judgeIds = new Set(db.assignments.filter(assignment => eventIds.has(assignment.eventId)).map(assignment => assignment.judgeId));
+    return send(res, 200, { stats: { projects: projectCount, teams: teams.length, judges: judgeIds.size, events: events.length } });
+  }
+
   if (method === 'POST' && (path === '/api/auth/register' || path === '/api/auth/signup')) {
     const name = validateString(input.name, 'name', 2, 100);
     const email = validateEmail(input.email);
@@ -296,13 +430,14 @@ async function route(req, res) {
       ...event,
       participantCount: db.registrations.filter(row => row.eventId === event.id).length,
       teamCount: db.teams.filter(team => team.eventId === event.id).length,
+      judgeCount: db.assignments.filter(assignment => assignment.eventId === event.id).length,
       projectCount: db.submissions.filter(project => project.status === 'SUBMITTED' && db.teams.some(team => team.id === project.teamId && team.eventId === event.id)).length,
       tracks: db.tracks.filter(track => track.eventId === event.id),
     })) });
   }
   if (method === 'GET' && parts[0] === 'api' && parts[1] === 'events' && parts[2] && parts.length === 3) {
     const event = eventOr404(parts[2]);
-    if (event.status === 'published') return send(res, 200, { event: { ...event, participantCount: db.registrations.filter(row => row.eventId === event.id).length, teamCount: db.teams.filter(team => team.eventId === event.id).length, projectCount: db.submissions.filter(project => project.status === 'SUBMITTED' && db.teams.some(team => team.id === project.teamId && team.eventId === event.id)).length, tracks: db.tracks.filter(track => track.eventId === event.id).map(track => ({ ...track, criteria: criteriaFor(event.id, track.id) })) } });
+    if (event.status === 'published') return send(res, 200, { event: { ...event, participantCount: db.registrations.filter(row => row.eventId === event.id).length, teamCount: db.teams.filter(team => team.eventId === event.id).length, judgeCount: db.assignments.filter(assignment => assignment.eventId === event.id).length, projectCount: db.submissions.filter(project => project.status === 'SUBMITTED' && db.teams.some(team => team.id === project.teamId && team.eventId === event.id)).length, tracks: db.tracks.filter(track => track.eventId === event.id).map(track => ({ ...track, criteria: criteriaFor(event.id, track.id) })) } });
     if (!req.headers.authorization) throw fail(404, 'Event not found');
   }
   if (method === 'GET' && parts[0] === 'api' && parts[1] === 'events' && parts[2] && parts[3] === 'leaderboard') {
@@ -673,7 +808,8 @@ async function route(req, res) {
       if (team.memberIds.length >= (eventOr404(team.eventId).teamCapacity || 5)) throw fail(409, 'This team is already full');
       const invite = { id: id(), code: randomBytes(8).toString('hex'), teamId: team.id, createdBy: user.id, expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), createdAt: now() };
       db.invites.push(invite); audit(user, 'team.invite.created', 'team', team.id); await persist();
-      return send(res, 201, { invite: { code: invite.code, expiresAt: invite.expiresAt, url: `/teams/demo-team?invite=${invite.code}` } });
+      const event = eventOr404(team.eventId);
+      return send(res, 201, { invite: { code: invite.code, expiresAt: invite.expiresAt, url: `/teams/demo-team?eventId=${encodeURIComponent(event.slug || event.id)}&invite=${invite.code}` } });
     }
     if (parts[2] && parts[3] === 'leave' && method === 'POST') {
       allow(user, 'participant'); const team = teamOr404(parts[2]);

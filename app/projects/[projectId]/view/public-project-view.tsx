@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { apiBody, apiRequest } from "../../../lib/api";
 import type { ProjectRecord } from "../project-data";
 import styles from "./view.module.css";
@@ -25,7 +26,8 @@ function TeamMember({ initials, name, role, tone }: { initials: string; name: st
   return <div className={styles.member}><span className={`${styles.memberAvatar} ${styles[tone]}`}>{initials}</span><span><strong>{name}</strong><small>{role}</small></span></div>;
 }
 
-export default function PublicProjectView({ project, comments, voteCount, votingEnabled, hasVoted, onVote, onCommentsChange }: {
+export default function PublicProjectView({ project, comments, voteCount, votingEnabled, hasVoted, onVote, onCommentsChange, eventSlug, eventTitle }: {
+  eventSlug: string; eventTitle: string;
   project: ProjectRecord;
   comments: Comment[];
   voteCount: number | null;
@@ -68,7 +70,7 @@ export default function PublicProjectView({ project, comments, voteCount, voting
       <header className={styles.projectHero}>
         <div className={styles.heroArtwork} aria-hidden="true"><span>{project.name.slice(0, 1)}</span><i /></div>
         <div className={styles.heroCopy}>
-          <div className={styles.heroEyebrow}><span /> DOGFOOD HACKATHON <i /> PUBLIC PROJECT</div>
+          <div className={styles.heroEyebrow}><span /> {eventTitle} <i /> PUBLIC PROJECT <Link href={`/events/${encodeURIComponent(eventSlug)}`}>Event details</Link></div>
           <div className={styles.heroTitleRow}><h1>{project.name}</h1><span className={styles.featuredBadge}>FEATURED PROJECT</span></div>
           <p className={styles.heroTagline}>{project.tagline}</p>
           <div className={styles.heroMeta}><span>{project.trackName}</span><i /><span>Updated {project.updatedAt}</span></div>

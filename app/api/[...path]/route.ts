@@ -6,6 +6,11 @@ export const dynamic = "force-dynamic";
 type RouteContext = { params: Promise<{ path: string[] }> };
 const SESSION_COOKIE = "hackforge_session";
 
+function secureCookie(request: Request) {
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0].trim();
+  return process.env.NODE_ENV === "production" && (forwardedProtocol === "https" || new URL(request.url).protocol === "https:");
+}
+
 async function forward(request: Request, context: RouteContext) {
   const { path } = await context.params;
   const endpoint = path.join("/");
@@ -15,7 +20,7 @@ async function forward(request: Request, context: RouteContext) {
 
   if (isLogout) {
     const response = Response.json({ ok: true });
-    response.headers.append("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.NODE_ENV === "production" ? "; Secure" : ""}`);
+    response.headers.append("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureCookie(request) ? "; Secure" : ""}`);
     return response;
   }
 
@@ -50,7 +55,7 @@ async function forward(request: Request, context: RouteContext) {
   if ((endpoint === "auth/login" || endpoint === "auth/signup" || endpoint === "auth/register") && upstream.ok) {
     const result = await upstream.json() as { token?: string; user?: unknown };
     if (result.token) {
-      responseHeaders.append("Set-Cookie", `${SESSION_COOKIE}=${result.token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${process.env.NODE_ENV === "production" ? "; Secure" : ""}`);
+      responseHeaders.append("Set-Cookie", `${SESSION_COOKIE}=${result.token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${secureCookie(request) ? "; Secure" : ""}`);
       return new Response(JSON.stringify({ user: result.user }), { status: upstream.status, headers: responseHeaders });
     }
     return Response.json(result, { status: upstream.status, headers: responseHeaders });

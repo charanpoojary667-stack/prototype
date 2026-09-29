@@ -9,13 +9,15 @@ type ApiComment = { id: string; body: string; createdAt: string; author?: { id: 
 type ApiProject = Omit<ProjectRecord, "id" | "name" | "description" | "trackName" | "technologies" | "teamName" | "teamMembers" | "updatedAt"> & {
   id: string; title: string; summary: string; track: string; tags: string[]; createdAt: string;
   team?: { id: string; name: string; members: { id: string; name: string }[] } | null;
-  event?: { votingEnabled: boolean; resultsPublic: boolean };
+  event?: { votingEnabled: boolean; resultsPublic: boolean; slug?: string; id?: string; title?: string };
 };
 
 export default function PublicProjectLoader({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<ProjectRecord | null>(null);
   const [comments, setComments] = useState<ApiComment[]>([]);
   const [voteCount, setVoteCount] = useState<number | null>(null);
+  const [eventSlug, setEventSlug] = useState("demo-event");
+  const [eventTitle, setEventTitle] = useState("DOGFOOD Hackathon");
   const [votingEnabled, setVotingEnabled] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [error, setError] = useState("");
@@ -33,6 +35,8 @@ export default function PublicProjectLoader({ projectId }: { projectId: string }
         });
         setComments(nextComments);
         setVoteCount(votes);
+        setEventSlug(item.event?.slug || item.event?.id || "demo-event");
+        setEventTitle(item.event?.title || "DOGFOOD Hackathon");
         setVotingEnabled(Boolean(item.event?.votingEnabled));
         setHasVoted(voted);
       })
@@ -41,5 +45,5 @@ export default function PublicProjectLoader({ projectId }: { projectId: string }
 
   if (error) return <p role="alert">{error}</p>;
   if (!project) return <p role="status">Loading project…</p>;
-  return <PublicProjectView project={project} comments={comments} voteCount={voteCount} votingEnabled={votingEnabled} hasVoted={hasVoted} onVote={() => setHasVoted(true)} onCommentsChange={setComments} />;
+  return <PublicProjectView eventSlug={eventSlug} eventTitle={eventTitle} project={project} comments={comments} voteCount={voteCount} votingEnabled={votingEnabled} hasVoted={hasVoted} onVote={() => setHasVoted(true)} onCommentsChange={setComments} />;
 }

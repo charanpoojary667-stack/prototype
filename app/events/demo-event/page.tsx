@@ -7,7 +7,7 @@ import { EventCountdown, EventRegistration } from "./event-live";
 import styles from "./event.module.css";
 import { apiRequest } from "../../lib/api";
 
-type EventData = { title: string; description: string; venue: string; startAt: string; endAt: string; registrationEndAt: string; submissionDeadline: string; teamCapacity: number; tracks: { id: string; name: string; description: string }[]; prizes: { name: string; value?: string; amount?: string }[]; rules: string[] };
+type EventData = { title: string; description: string; venue: string; status: string; registrationStartAt: string; registrationEndAt: string; startAt: string; endAt: string; submissionDeadline: string; judgingStartAt: string; judgingEndAt: string; teamCapacity: number; participantCount: number; teamCount: number; projectCount: number; tracks: { id: string; name: string; description: string }[]; prizes: { name: string; value?: string; amount?: string }[]; rules: string[] };
 
 type IconName = "arrow" | "calendar" | "check" | "clock" | "globe" | "grid" | "leaf" | "people" | "settings" | "spark" | "trophy";
 
@@ -104,10 +104,17 @@ function SectionHeading({
   );
 }
 
-export default function DemoEventPage() {
+export default function DemoEventPage({ slug = "demo-event" }: { slug?: string }) {
   const [event, setEvent] = useState<EventData | null>(null);
-  useEffect(() => { apiRequest<{ event: EventData }>("/api/events/demo-event").then(({ event: data }) => setEvent(data)); }, []);
-  if (!event) return <main className={`dashboard-main ${styles.eventMain}`}><p role="status">Loading event details…</p></main>;
+  const [error, setError] = useState("");
+  const [now, setNow] = useState<number | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => { let active = true; apiRequest<{ event: EventData }>(`/api/events/${encodeURIComponent(slug)}`).then(({ event: data }) => { if (active) { setEvent(data); setError(""); } }).catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Event details could not be loaded."); }); return () => { active = false; }; }, [slug, attempt]);
+  if (!event) return <main className={`dashboard-main ${styles.eventMain}`}><section role={error ? "alert" : "status"}>{error ? <>Event details could not be loaded. {error} <button type="button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Retry</button></> : "Loading event details…"}</section></main>;
+  const prizeTotal = event.prizes.reduce((total, prize) => total + (Number(String(prize.value || prize.amount || "").replace(/[^\d.]/g, "")) || 0), 0);
+  const prizeTotalLabel = prizeTotal ? `${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(prizeTotal)} in total prizes` : "Prize details set by the organizer";
+  const phase = now === null ? "Checking schedule…" : now >= Date.parse(event.judgingEndAt) || (Number.isNaN(Date.parse(event.judgingEndAt)) && now >= Date.parse(event.endAt)) ? "Completed" : now >= Date.parse(event.judgingStartAt) ? "Judging" : now < Date.parse(event.registrationStartAt) ? "Upcoming" : now < Date.parse(event.registrationEndAt) ? "Registration Open" : now < Date.parse(event.startAt) ? "Registration Closed" : now < Date.parse(event.submissionDeadline) ? "Submissions Open" : "Submissions Closed";
   const dateLabel = (date: string) => new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
   const schedule = [event.startAt, event.submissionDeadline, event.endAt].map((date, index) => ({ date: dateLabel(date).toUpperCase(), day: new Date(date).toLocaleDateString(undefined, { weekday: "long", timeZone: "UTC" }), title: ["Event kickoff", "Submission deadline", "Event closes"][index], detail: ["The event begins.", "Submit your team project by this time.", "The event concludes."][index] }));
   return (
@@ -140,14 +147,16 @@ export default function DemoEventPage() {
               <div className={styles.heroMeta}>
                 <span><Icon name="calendar" size={16} /> {dateLabel(event.startAt)}–{dateLabel(event.endAt)}, {new Date(event.startAt).getUTCFullYear()}</span>
                 <span><Icon name="globe" size={16} /> {event.venue}</span>
+                <span>{event.participantCount} registered · {event.teamCount} teams</span>
+                <span>{event.projectCount} submitted projects</span>
               </div>
             </div>
 
             <aside className={styles.joinPanel} aria-label="Registration and event countdown">
-              <div className={styles.registrationBadge}><span /> REGISTRATION OPEN</div>
-              <EventCountdown />
+              <div className={styles.registrationBadge}><span /> {phase}</div>
+              <EventCountdown slug={slug} />
               <p className={styles.deadline}><Icon name="clock" size={14} /> Registration closes {new Date(event.registrationEndAt).toUTCString()}</p>
-              <EventRegistration />
+              <EventRegistration slug={slug} eventTitle={event.title} />
               <p className={styles.joinNote}>Free to join · No experience required</p>
             </aside>
           </section>
@@ -197,7 +206,7 @@ export default function DemoEventPage() {
                       <strong>{prize.amount || prize.value}</strong>
                     </div>
                   ))}
-                  <p className={styles.prizeNote}><Icon name="trophy" size={15} /> $8,000 in total prizes</p>
+                  <p className={styles.prizeNote}><Icon name="trophy" size={15} /> {prizeTotalLabel}</p>
                 </div>
               </section>
 
