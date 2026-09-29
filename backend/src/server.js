@@ -7,6 +7,9 @@ const scrypt = promisify(scryptCallback);
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '0.0.0.0';
 const SECRET = process.env.JWT_SECRET || 'development-only-change-this-secret';
+const JWT_ISSUER = process.env.JWT_ISSUER || 'dogfood-judging-api';
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'dogfood-judging-platform';
+const JWT_TTL_SECONDS = 7 * 24 * 60 * 60;
 const MAX_BODY = 1024 * 1024;
 const ROLES = ['organizer', 'judge', 'participant'];
 
@@ -27,22 +30,46 @@ async function verifyPassword(password, stored) {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 function tokenFor(user) {
-  const payload = Buffer.from(JSON.stringify({ sub: user.id, iat: Date.now(), exp: Date.now() + 7 * 86400000 })).toString('base64url');
-  const signature = createHmac('sha256', SECRET).update(payload).digest('base64url');
-  return `${payload}.${signature}`;
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const claims = Buffer.from(JSON.stringify({
+    sub: user.id,
+    iss: JWT_ISSUER,
+    aud: JWT_AUDIENCE,
+    iat: issuedAt,
+    exp: issuedAt + JWT_TTL_SECONDS,
+  })).toString('base64url');
+  const unsigned = `${header}.${claims}`;
+  const signature = createHmac('sha256', SECRET).update(unsigned).digest('base64url');
+  return `${unsigned}.${signature}`;
 }
 function authenticate(req) {
   const token = req.headers.authorization?.match(/^Bearer (.+)$/i)?.[1];
   if (!token) throw fail(401, 'Authentication required');
-  const [payload, signature] = token.split('.');
-  if (!payload || !signature) throw fail(401, 'Invalid or expired token');
-  const expected = createHmac('sha256', SECRET).update(payload).digest();
+  const parts = token.split('.');
+  if (parts.length !== 3 || parts.some(part => !part)) throw fail(401, 'Invalid or expired token');
+  const [encodedHeader, encodedClaims, encodedSignature] = parts;
+  const unsigned = `${encodedHeader}.${encodedClaims}`;
+  const expected = createHmac('sha256', SECRET).update(unsigned).digest();
   let supplied;
-  try { supplied = Buffer.from(signature, 'base64url'); } catch { throw fail(401, 'Invalid or expired token'); }
+  try { supplied = Buffer.from(encodedSignature, 'base64url'); } catch { throw fail(401, 'Invalid or expired token'); }
   if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) throw fail(401, 'Invalid or expired token');
-  let claims;
-  try { claims = JSON.parse(Buffer.from(payload, 'base64url').toString()); } catch { throw fail(401, 'Invalid or expired token'); }
-  if (claims.exp < Date.now()) throw fail(401, 'Invalid or expired token');
+  let header; let claims;
+  try {
+    header = JSON.parse(Buffer.from(encodedHeader, 'base64url').toString());
+    claims = JSON.parse(Buffer.from(encodedClaims, 'base64url').toString());
+  } catch { throw fail(401, 'Invalid or expired token'); }
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if (header.alg !== 'HS256' || header.typ !== 'JWT'
+      || typeof claims.sub !== 'string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(claims.sub)
+      || claims.iss !== JWT_ISSUER
+      || claims.aud !== JWT_AUDIENCE
+      || !Number.isInteger(claims.iat)
+      || !Number.isInteger(claims.exp)
+      || claims.exp <= claims.iat
+      || claims.exp <= nowSeconds
+      || claims.iat > nowSeconds + 60) throw fail(401, 'Invalid or expired token');
   const user = db.users.find(item => item.id === claims.sub);
   if (!user) throw fail(401, 'Account no longer exists');
   return user;

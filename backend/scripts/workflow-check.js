@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -9,7 +10,10 @@ const root = resolve(import.meta.dirname, '..');
 const work = await mkdtemp(join(tmpdir(), 'dogfood-workflow-'));
 const port = 20000 + Math.floor(Math.random() * 30000);
 const base = `http://127.0.0.1:${port}/api`;
-const childEnv = { ...process.env, PORT: String(port), HOST: '127.0.0.1', DATA_FILE: join(work, 'db.json'), JWT_SECRET: 'workflow-check-secret-at-least-32-characters-long', ORGANIZER_INVITE_CODE: 'check-organizer', JUDGE_INVITE_CODE: 'check-judge', NODE_ENV: 'test' };
+const testSecret = 'workflow-check-secret-at-least-32-characters-long';
+const jwtIssuer = 'dogfood-judging-api';
+const jwtAudience = 'dogfood-judging-platform';
+const childEnv = { ...process.env, PORT: String(port), HOST: '127.0.0.1', DATA_FILE: join(work, 'db.json'), JWT_SECRET: testSecret, JWT_ISSUER: jwtIssuer, JWT_AUDIENCE: jwtAudience, ORGANIZER_INVITE_CODE: 'check-organizer', JUDGE_INVITE_CODE: 'check-judge', NODE_ENV: 'test' };
 delete childEnv.DATABASE_URL;
 const server = spawn(process.execPath, ['src/server.js'], { cwd: root, env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
 let logs = '';
@@ -21,6 +25,13 @@ async function request(path, method = 'GET', token, data, expected = 200) {
   const result = await response.json();
   assert.equal(response.status, expected, `${method} ${path}: ${JSON.stringify(result)}`);
   return result;
+}
+
+function signTestToken(claims, header = { alg: 'HS256', typ: 'JWT' }) {
+  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+  const encodedClaims = Buffer.from(JSON.stringify(claims)).toString('base64url');
+  const unsigned = `${encodedHeader}.${encodedClaims}`;
+  return `${unsigned}.${createHmac('sha256', testSecret).update(unsigned).digest('base64url')}`;
 }
 
 try {
@@ -38,7 +49,24 @@ try {
   const judge = await request('/auth/register', 'POST', null, { name: 'Workflow Judge', email: `judge-${suffix}@example.test`, password: 'CheckPass123!', role: 'judge', inviteCode: 'check-judge' }, 201);
   const otherJudge = await request('/auth/register', 'POST', null, { name: 'Other Workflow Judge', email: `other-judge-${suffix}@example.test`, password: 'CheckPass123!', role: 'judge', inviteCode: 'check-judge' }, 201);
   const participant = await request('/auth/register', 'POST', null, { name: 'Workflow Participant', email: `participant-${suffix}@example.test`, password: 'CheckPass123!' }, 201);
+  const jwtParts = participant.token.split('.');
+  assert.equal(jwtParts.length, 3, 'access token should use the standard three-part JWT format');
+  const jwtHeader = JSON.parse(Buffer.from(jwtParts[0], 'base64url').toString());
+  const jwtClaims = JSON.parse(Buffer.from(jwtParts[1], 'base64url').toString());
+  assert.deepEqual(jwtHeader, { alg: 'HS256', typ: 'JWT' });
+  assert.equal(jwtClaims.sub, participant.user.id);
+  assert.match(jwtClaims.sub, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  assert.equal(jwtClaims.iss, jwtIssuer);
+  assert.equal(jwtClaims.aud, jwtAudience);
+  assert.ok(Number.isInteger(jwtClaims.iat) && Number.isInteger(jwtClaims.exp));
+  assert.equal(jwtClaims.exp - jwtClaims.iat, 7 * 24 * 60 * 60);
   assert.equal((await request('/auth/me', 'GET', participant.token)).user.role, 'participant');
+  const wrongAudience = signTestToken({ ...jwtClaims, aud: 'some-other-service' });
+  await request('/auth/me', 'GET', wrongAudience, undefined, 401);
+  const expiredToken = signTestToken({ ...jwtClaims, iat: Math.floor(Date.now() / 1000) - 120, exp: Math.floor(Date.now() / 1000) - 60 });
+  await request('/auth/me', 'GET', expiredToken, undefined, 401);
+  const alteredSignature = `${jwtParts[2][0] === 'A' ? 'B' : 'A'}${jwtParts[2].slice(1)}`;
+  await request('/auth/me', 'GET', `${jwtParts[0]}.${jwtParts[1]}.${alteredSignature}`, undefined, 401);
   await request('/auth/login', 'POST', null, { email: `participant-${suffix}@example.test`, password: 'CheckPass123!' });
 
   const startAt = new Date(Date.now() + 86400000).toISOString();

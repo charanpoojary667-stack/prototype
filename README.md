@@ -16,6 +16,9 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Authentication contract
+
+Access tokens are standard three-part JWTs signed with HS256. Node and Python services must share `JWT_SECRET`; defaults are `JWT_ISSUER=dogfood-judging-api` and `JWT_AUDIENCE=dogfood-judging-platform` (override both consistently if needed). Claims are `sub` (the user's UUID), `iss`, `aud`, `iat`, and `exp`; timestamps are Unix seconds and tokens expire after seven days. Authorization roles are loaded from the shared `users` row, not trusted from token claims. Tokens issued in the earlier custom format are invalid after this change; users must log in again.
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
