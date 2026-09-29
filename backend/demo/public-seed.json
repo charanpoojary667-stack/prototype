@@ -1,0 +1,962 @@
+{
+  "events": [
+    {
+      "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+      "slug": "demo-event",
+      "title": "DOGFOOD Hackathon",
+      "description": "Three days to turn a good idea into something real. Find your team, make in the open, and show the world what you built.",
+      "venue": "Online · Global",
+      "status": "published",
+      "registrationStartAt": "2026-09-01T00:00:00.000Z",
+      "registrationEndAt": "2026-10-08T23:59:00.000Z",
+      "startAt": "2026-10-09T00:00:00.000Z",
+      "submissionDeadline": "2026-10-11T18:00:00.000Z",
+      "judgingStartAt": "2026-10-11T18:00:00.000Z",
+      "endAt": "2026-10-11T23:59:00.000Z",
+      "judgingEndAt": "2026-10-12T12:00:00.000Z",
+      "resultsPublic": true,
+      "votingEnabled": true,
+      "teamCapacity": 5,
+      "rules": [
+        "Be kind and build in the open.",
+        "Submit original work created during the event.",
+        "Include a working repository or demo link."
+      ],
+      "prizes": [
+        {
+          "name": "Grand Prize",
+          "value": "$2,500"
+        },
+        {
+          "name": "Community Choice",
+          "value": "$1,000"
+        }
+      ],
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "updatedAt": "2026-09-29T09:10:12.358Z",
+      "participantCount": 4,
+      "teamCount": 5,
+      "judgeCount": 2,
+      "projectCount": 5,
+      "tracks": [
+        {
+          "id": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Open source",
+          "description": "Tools that make the commons stronger.",
+          "createdAt": "2026-09-29T09:10:12.358Z"
+        },
+        {
+          "id": "c7b3a168-ec8d-4c25-8744-d7cd91e585ad",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Community",
+          "description": "Technology that brings people together.",
+          "createdAt": "2026-09-29T09:10:12.358Z"
+        },
+        {
+          "id": "a76fc097-fc4d-4387-a8ff-37e83d9e4ddf",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Climate",
+          "description": "Practical ideas for a more resilient future.",
+          "createdAt": "2026-09-29T09:10:12.358Z"
+        }
+      ]
+    },
+    {
+      "id": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+      "slug": "open-build-weekend",
+      "title": "Open Build Weekend",
+      "description": "A welcoming weekend for practical open-source tools, accessible design, and resilient communities.",
+      "venue": "Online · Global",
+      "status": "published",
+      "registrationStartAt": "2026-09-10T00:00:00.000Z",
+      "registrationEndAt": "2026-10-22T23:59:00.000Z",
+      "startAt": "2026-10-23T00:00:00.000Z",
+      "submissionDeadline": "2026-10-25T18:00:00.000Z",
+      "judgingStartAt": "2026-10-25T18:00:00.000Z",
+      "endAt": "2026-10-25T23:59:00.000Z",
+      "judgingEndAt": "2026-10-26T12:00:00.000Z",
+      "resultsPublic": false,
+      "votingEnabled": true,
+      "teamCapacity": 4,
+      "rules": [
+        "Build something new during the event.",
+        "Use open tools and credit your collaborators.",
+        "Share a repository or demo with your submission."
+      ],
+      "prizes": [
+        {
+          "name": "Open Source Impact",
+          "value": "$1,500"
+        },
+        {
+          "name": "People’s Choice",
+          "value": "$500"
+        }
+      ],
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "updatedAt": "2026-09-29T15:33:59.155Z",
+      "participantCount": 3,
+      "teamCount": 3,
+      "judgeCount": 2,
+      "projectCount": 3,
+      "tracks": [
+        {
+          "id": "20ce18a2-6e7c-4529-9ae5-68ed3ed27ecc",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Accessible by Design",
+          "description": "Make useful experiences work for more people.",
+          "createdAt": "2026-09-29T15:33:59.155Z"
+        },
+        {
+          "id": "20444e39-b0ad-49da-a2f7-a30f1fc2b94b",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Climate Tools",
+          "description": "Build for a more resilient future.",
+          "createdAt": "2026-09-29T15:33:59.155Z"
+        },
+        {
+          "id": "a49843d3-3015-4715-a16d-1697ffa210fd",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Civic Technology",
+          "description": "Give communities better ways to participate.",
+          "createdAt": "2026-09-29T15:33:59.155Z"
+        }
+      ]
+    }
+  ],
+  "eventDetails": {
+    "demo-event": {
+      "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+      "slug": "demo-event",
+      "title": "DOGFOOD Hackathon",
+      "description": "Three days to turn a good idea into something real. Find your team, make in the open, and show the world what you built.",
+      "venue": "Online · Global",
+      "status": "published",
+      "registrationStartAt": "2026-09-01T00:00:00.000Z",
+      "registrationEndAt": "2026-10-08T23:59:00.000Z",
+      "startAt": "2026-10-09T00:00:00.000Z",
+      "submissionDeadline": "2026-10-11T18:00:00.000Z",
+      "judgingStartAt": "2026-10-11T18:00:00.000Z",
+      "endAt": "2026-10-11T23:59:00.000Z",
+      "judgingEndAt": "2026-10-12T12:00:00.000Z",
+      "resultsPublic": true,
+      "votingEnabled": true,
+      "teamCapacity": 5,
+      "rules": [
+        "Be kind and build in the open.",
+        "Submit original work created during the event.",
+        "Include a working repository or demo link."
+      ],
+      "prizes": [
+        {
+          "name": "Grand Prize",
+          "value": "$2,500"
+        },
+        {
+          "name": "Community Choice",
+          "value": "$1,000"
+        }
+      ],
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "updatedAt": "2026-09-29T09:10:12.358Z",
+      "participantCount": 4,
+      "teamCount": 5,
+      "judgeCount": 2,
+      "projectCount": 5,
+      "tracks": [
+        {
+          "id": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Open source",
+          "description": "Tools that make the commons stronger.",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "criteria": []
+        },
+        {
+          "id": "c7b3a168-ec8d-4c25-8744-d7cd91e585ad",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Community",
+          "description": "Technology that brings people together.",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "criteria": []
+        },
+        {
+          "id": "a76fc097-fc4d-4387-a8ff-37e83d9e4ddf",
+          "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+          "name": "Climate",
+          "description": "Practical ideas for a more resilient future.",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "criteria": []
+        }
+      ]
+    },
+    "open-build-weekend": {
+      "id": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+      "slug": "open-build-weekend",
+      "title": "Open Build Weekend",
+      "description": "A welcoming weekend for practical open-source tools, accessible design, and resilient communities.",
+      "venue": "Online · Global",
+      "status": "published",
+      "registrationStartAt": "2026-09-10T00:00:00.000Z",
+      "registrationEndAt": "2026-10-22T23:59:00.000Z",
+      "startAt": "2026-10-23T00:00:00.000Z",
+      "submissionDeadline": "2026-10-25T18:00:00.000Z",
+      "judgingStartAt": "2026-10-25T18:00:00.000Z",
+      "endAt": "2026-10-25T23:59:00.000Z",
+      "judgingEndAt": "2026-10-26T12:00:00.000Z",
+      "resultsPublic": false,
+      "votingEnabled": true,
+      "teamCapacity": 4,
+      "rules": [
+        "Build something new during the event.",
+        "Use open tools and credit your collaborators.",
+        "Share a repository or demo with your submission."
+      ],
+      "prizes": [
+        {
+          "name": "Open Source Impact",
+          "value": "$1,500"
+        },
+        {
+          "name": "People’s Choice",
+          "value": "$500"
+        }
+      ],
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "updatedAt": "2026-09-29T15:33:59.155Z",
+      "participantCount": 3,
+      "teamCount": 3,
+      "judgeCount": 2,
+      "projectCount": 3,
+      "tracks": [
+        {
+          "id": "20ce18a2-6e7c-4529-9ae5-68ed3ed27ecc",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Accessible by Design",
+          "description": "Make useful experiences work for more people.",
+          "createdAt": "2026-09-29T15:33:59.155Z",
+          "criteria": []
+        },
+        {
+          "id": "20444e39-b0ad-49da-a2f7-a30f1fc2b94b",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Climate Tools",
+          "description": "Build for a more resilient future.",
+          "createdAt": "2026-09-29T15:33:59.155Z",
+          "criteria": []
+        },
+        {
+          "id": "a49843d3-3015-4715-a16d-1697ffa210fd",
+          "eventId": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+          "name": "Civic Technology",
+          "description": "Give communities better ways to participate.",
+          "createdAt": "2026-09-29T15:33:59.155Z",
+          "criteria": []
+        }
+      ]
+    }
+  },
+  "projects": [
+    {
+      "id": "430c8434-8f7a-498a-b445-1ed3b2d064f2",
+      "teamId": "595ce14c-3f67-4713-87e9-b126be17de07",
+      "trackId": "c7b3a168-ec8d-4c25-8744-d7cd91e585ad",
+      "title": "CivicSignal",
+      "tagline": "A better way to be heard locally.",
+      "summary": "A better way to be heard locally. Built by Pixel Pioneers during DOGFOOD Hackathon.",
+      "tags": [
+        "Next.js",
+        "Open data",
+        "Civic tech"
+      ],
+      "repositoryUrl": "https://github.com/example/hackforge-demo",
+      "demoUrl": "https://example.com",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "updatedAt": "2026-09-29T09:10:12.358Z",
+      "submittedAt": "2026-09-29T09:10:12.358Z",
+      "track": "Community",
+      "team": {
+        "id": "595ce14c-3f67-4713-87e9-b126be17de07",
+        "name": "Pixel Pioneers",
+        "members": [
+          {
+            "id": "595ce14c-3f67-4713-87e9-b126be17de07-member-1",
+            "name": "Jordan Lee"
+          },
+          {
+            "id": "595ce14c-3f67-4713-87e9-b126be17de07-member-2",
+            "name": "Riley Brooks"
+          }
+        ]
+      },
+      "event": {
+        "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+        "slug": "demo-event",
+        "title": "DOGFOOD Hackathon",
+        "submissionDeadline": "2026-10-11T18:00:00.000Z",
+        "teamCapacity": 5,
+        "votingEnabled": true,
+        "resultsPublic": true
+      }
+    },
+    {
+      "id": "bbd11b74-52ea-4768-a993-f2b361e65564",
+      "teamId": "a6283f7b-f49e-4ffc-a138-f195c824ad42",
+      "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+      "title": "OpenShelf",
+      "tagline": "Making neighborhood sharing feel effortless.",
+      "summary": "Making neighborhood sharing feel effortless. Built by Good Neighbors during DOGFOOD Hackathon.",
+      "tags": [
+        "TypeScript",
+        "Mutual aid",
+        "Maps"
+      ],
+      "repositoryUrl": "https://github.com/example/hackforge-demo",
+      "demoUrl": "https://example.com",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "updatedAt": "2026-09-29T09:10:12.358Z",
+      "submittedAt": "2026-09-29T09:10:12.358Z",
+      "track": "Open source",
+      "team": {
+        "id": "a6283f7b-f49e-4ffc-a138-f195c824ad42",
+        "name": "Good Neighbors",
+        "members": [
+          {
+            "id": "a6283f7b-f49e-4ffc-a138-f195c824ad42-member-1",
+            "name": "Morgan Chen"
+          }
+        ]
+      },
+      "event": {
+        "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+        "slug": "demo-event",
+        "title": "DOGFOOD Hackathon",
+        "submissionDeadline": "2026-10-11T18:00:00.000Z",
+        "teamCapacity": 5,
+        "votingEnabled": true,
+        "resultsPublic": true
+      }
+    },
+    {
+      "id": "50529199-4a35-418f-9521-c7abd97c84da",
+      "teamId": "26093218-3a4d-4c8c-812a-9e184fa3f100",
+      "trackId": "a76fc097-fc4d-4387-a8ff-37e83d9e4ddf",
+      "title": "Tidepool",
+      "tagline": "Turn shoreline observations into action.",
+      "summary": "Turn shoreline observations into action. Built by Blue Hour during DOGFOOD Hackathon.",
+      "tags": [
+        "Python",
+        "Sensors",
+        "Open data"
+      ],
+      "repositoryUrl": "https://github.com/example/hackforge-demo",
+      "demoUrl": "https://example.com",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "updatedAt": "2026-09-29T09:10:12.358Z",
+      "submittedAt": "2026-09-29T09:10:12.358Z",
+      "track": "Climate",
+      "team": {
+        "id": "26093218-3a4d-4c8c-812a-9e184fa3f100",
+        "name": "Blue Hour",
+        "members": [
+          {
+            "id": "26093218-3a4d-4c8c-812a-9e184fa3f100-member-1",
+            "name": "Sam Rivera"
+          }
+        ]
+      },
+      "event": {
+        "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+        "slug": "demo-event",
+        "title": "DOGFOOD Hackathon",
+        "submissionDeadline": "2026-10-11T18:00:00.000Z",
+        "teamCapacity": 5,
+        "votingEnabled": true,
+        "resultsPublic": true
+      }
+    },
+    {
+      "id": "a9e18e44-d68f-40bc-9c21-09f54396aec7",
+      "teamId": "a26f74ee-bed2-4537-a4c3-013055888128",
+      "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+      "title": "Flow Project caf1633cb0",
+      "tagline": "A real test project",
+      "summary": "Draft saved through persistent API storage.",
+      "tags": [
+        "test"
+      ],
+      "repositoryUrl": "",
+      "demoUrl": "",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T09:14:40.480Z",
+      "updatedAt": "2026-09-29T09:14:40.496Z",
+      "submittedAt": "2026-09-29T09:14:40.496Z",
+      "track": "Open source",
+      "team": {
+        "id": "a26f74ee-bed2-4537-a4c3-013055888128",
+        "name": "Flow Team caf1633cb0",
+        "members": [
+          {
+            "id": "a26f74ee-bed2-4537-a4c3-013055888128-member-1",
+            "name": "Flow Tester"
+          }
+        ]
+      },
+      "event": {
+        "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+        "slug": "demo-event",
+        "title": "DOGFOOD Hackathon",
+        "submissionDeadline": "2026-10-11T18:00:00.000Z",
+        "teamCapacity": 5,
+        "votingEnabled": true,
+        "resultsPublic": true
+      }
+    },
+    {
+      "id": "12baee74-1c2e-4566-907e-b2887e37c666",
+      "teamId": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1",
+      "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+      "title": "Flow Project 39575d0d27",
+      "tagline": "A real test project",
+      "summary": "Draft saved through persistent API storage.",
+      "tags": [
+        "test"
+      ],
+      "repositoryUrl": "",
+      "demoUrl": "",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T09:15:17.612Z",
+      "updatedAt": "2026-09-29T09:15:17.625Z",
+      "submittedAt": "2026-09-29T09:15:17.625Z",
+      "track": "Open source",
+      "team": {
+        "id": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1",
+        "name": "Flow Team 39575d0d27",
+        "members": [
+          {
+            "id": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1-member-1",
+            "name": "Flow Tester"
+          }
+        ]
+      },
+      "event": {
+        "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+        "slug": "demo-event",
+        "title": "DOGFOOD Hackathon",
+        "submissionDeadline": "2026-10-11T18:00:00.000Z",
+        "teamCapacity": 5,
+        "votingEnabled": true,
+        "resultsPublic": true
+      }
+    },
+    {
+      "id": "0d02f7e2-93fa-4f37-9fc8-583169e0054f",
+      "teamId": "c9a0681f-dc06-43f3-a699-7be0c73edfc3",
+      "trackId": "20ce18a2-6e7c-4529-9ae5-68ed3ed27ecc",
+      "title": "CaptionKit",
+      "tagline": "Live captions that stay readable in the real world.",
+      "summary": "Live captions that stay readable in the real world. Designed and prototyped by Access Lab for Open Build Weekend.",
+      "tags": [
+        "Accessibility",
+        "Speech",
+        "Web"
+      ],
+      "repositoryUrl": "",
+      "demoUrl": "",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "updatedAt": "2026-09-29T15:33:59.155Z",
+      "submittedAt": "2026-09-29T15:33:59.155Z",
+      "track": "Accessible by Design",
+      "team": {
+        "id": "c9a0681f-dc06-43f3-a699-7be0c73edfc3",
+        "name": "Access Lab",
+        "members": [
+          {
+            "id": "c9a0681f-dc06-43f3-a699-7be0c73edfc3-member-1",
+            "name": "Jordan Lee"
+          }
+        ]
+      },
+      "event": {
+        "id": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+        "slug": "open-build-weekend",
+        "title": "Open Build Weekend",
+        "submissionDeadline": "2026-10-25T18:00:00.000Z",
+        "teamCapacity": 4,
+        "votingEnabled": true,
+        "resultsPublic": false
+      }
+    },
+    {
+      "id": "1d9872a9-800a-4c90-8896-a23caa9a3ff2",
+      "teamId": "287d32b5-82e7-4cd0-84d9-f097463da9f7",
+      "trackId": "20444e39-b0ad-49da-a2f7-a30f1fc2b94b",
+      "title": "Canopy",
+      "tagline": "A neighborhood tree map that helps residents plan together.",
+      "summary": "A neighborhood tree map that helps residents plan together. Designed and prototyped by Canopy Works for Open Build Weekend.",
+      "tags": [
+        "Climate",
+        "Maps",
+        "Community data"
+      ],
+      "repositoryUrl": "",
+      "demoUrl": "",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "updatedAt": "2026-09-29T15:33:59.155Z",
+      "submittedAt": "2026-09-29T15:33:59.155Z",
+      "track": "Climate Tools",
+      "team": {
+        "id": "287d32b5-82e7-4cd0-84d9-f097463da9f7",
+        "name": "Canopy Works",
+        "members": [
+          {
+            "id": "287d32b5-82e7-4cd0-84d9-f097463da9f7-member-1",
+            "name": "Riley Brooks"
+          }
+        ]
+      },
+      "event": {
+        "id": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+        "slug": "open-build-weekend",
+        "title": "Open Build Weekend",
+        "submissionDeadline": "2026-10-25T18:00:00.000Z",
+        "teamCapacity": 4,
+        "votingEnabled": true,
+        "resultsPublic": false
+      }
+    },
+    {
+      "id": "ef3b674d-b81a-4040-bf75-a6b46fdcf45b",
+      "teamId": "0b7d3d58-4f20-41d1-81cb-7de8fd0b29e3",
+      "trackId": "a49843d3-3015-4715-a16d-1697ffa210fd",
+      "title": "CivicPatch",
+      "tagline": "Small, clear steps for turning local feedback into action.",
+      "summary": "Small, clear steps for turning local feedback into action. Designed and prototyped by Common Ground for Open Build Weekend.",
+      "tags": [
+        "Civic tech",
+        "Open data",
+        "Workflow"
+      ],
+      "repositoryUrl": "",
+      "demoUrl": "",
+      "status": "SUBMITTED",
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "updatedAt": "2026-09-29T15:33:59.155Z",
+      "submittedAt": "2026-09-29T15:33:59.155Z",
+      "track": "Civic Technology",
+      "team": {
+        "id": "0b7d3d58-4f20-41d1-81cb-7de8fd0b29e3",
+        "name": "Common Ground",
+        "members": [
+          {
+            "id": "0b7d3d58-4f20-41d1-81cb-7de8fd0b29e3-member-1",
+            "name": "Flow Tester"
+          }
+        ]
+      },
+      "event": {
+        "id": "f74475d3-103a-4d2a-b1ec-cf7d37e94667",
+        "slug": "open-build-weekend",
+        "title": "Open Build Weekend",
+        "submissionDeadline": "2026-10-25T18:00:00.000Z",
+        "teamCapacity": 4,
+        "votingEnabled": true,
+        "resultsPublic": false
+      }
+    }
+  ],
+  "comments": [
+    {
+      "id": "f5dd364b-de49-4335-8b89-96bb691f4d73",
+      "projectId": "430c8434-8f7a-498a-b445-1ed3b2d064f2",
+      "body": "Clear problem framing and a thoughtful community-first direction.",
+      "createdAt": "2026-09-29T09:10:12.358Z",
+      "author": {
+        "id": "demo-author-1",
+        "name": "Sam Rivera"
+      }
+    },
+    {
+      "id": "e6fe9137-5282-4b6e-adae-4041af275742",
+      "projectId": "a9e18e44-d68f-40bc-9c21-09f54396aec7",
+      "body": "Persistent integration test comment",
+      "createdAt": "2026-09-29T09:15:17.992Z",
+      "author": {
+        "id": "demo-author-2",
+        "name": "Flow Tester"
+      }
+    },
+    {
+      "id": "8d2309f7-9f58-43ee-9202-d690d5732a1a",
+      "projectId": "0d02f7e2-93fa-4f37-9fc8-583169e0054f",
+      "body": "The accessibility details are unusually clear and practical.",
+      "createdAt": "2026-09-29T15:33:59.155Z",
+      "author": {
+        "id": "demo-author-3",
+        "name": "Sam Rivera"
+      }
+    }
+  ],
+  "voteCounts": {
+    "430c8434-8f7a-498a-b445-1ed3b2d064f2": 0,
+    "bbd11b74-52ea-4768-a993-f2b361e65564": 1,
+    "50529199-4a35-418f-9521-c7abd97c84da": 0,
+    "a9e18e44-d68f-40bc-9c21-09f54396aec7": 1,
+    "12baee74-1c2e-4566-907e-b2887e37c666": 0,
+    "0d02f7e2-93fa-4f37-9fc8-583169e0054f": 0,
+    "1d9872a9-800a-4c90-8896-a23caa9a3ff2": 1,
+    "ef3b674d-b81a-4040-bf75-a6b46fdcf45b": 0
+  },
+  "leaderboards": {
+    "demo-event": [
+      {
+        "rank": 1,
+        "team": {
+          "id": "595ce14c-3f67-4713-87e9-b126be17de07",
+          "name": "Pixel Pioneers",
+          "members": [
+            {
+              "id": "595ce14c-3f67-4713-87e9-b126be17de07-member-1",
+              "name": "Jordan Lee"
+            },
+            {
+              "id": "595ce14c-3f67-4713-87e9-b126be17de07-member-2",
+              "name": "Riley Brooks"
+            }
+          ]
+        },
+        "submission": {
+          "id": "430c8434-8f7a-498a-b445-1ed3b2d064f2",
+          "teamId": "595ce14c-3f67-4713-87e9-b126be17de07",
+          "trackId": "c7b3a168-ec8d-4c25-8744-d7cd91e585ad",
+          "title": "CivicSignal",
+          "tagline": "A better way to be heard locally.",
+          "summary": "A better way to be heard locally. Built by Pixel Pioneers during DOGFOOD Hackathon.",
+          "tags": [
+            "Next.js",
+            "Open data",
+            "Civic tech"
+          ],
+          "repositoryUrl": "https://github.com/example/hackforge-demo",
+          "demoUrl": "https://example.com",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "updatedAt": "2026-09-29T09:10:12.358Z",
+          "submittedAt": "2026-09-29T09:10:12.358Z",
+          "track": "Community",
+          "team": {
+            "id": "595ce14c-3f67-4713-87e9-b126be17de07",
+            "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "name": "Pixel Pioneers",
+            "memberIds": [
+              "917db4bd-b8ef-4ab2-8abc-5d849a7d4ccb",
+              "4406c53d-8cfc-4428-a9d5-56e8f1e2164c"
+            ],
+            "createdBy": "917db4bd-b8ef-4ab2-8abc-5d849a7d4ccb",
+            "createdAt": "2026-09-29T09:10:12.358Z",
+            "members": [
+              {
+                "id": "917db4bd-b8ef-4ab2-8abc-5d849a7d4ccb",
+                "name": "Jordan Lee"
+              },
+              {
+                "id": "4406c53d-8cfc-4428-a9d5-56e8f1e2164c",
+                "name": "Riley Brooks"
+              }
+            ]
+          },
+          "event": {
+            "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "slug": "demo-event",
+            "title": "DOGFOOD Hackathon",
+            "submissionDeadline": "2026-10-11T18:00:00.000Z",
+            "teamCapacity": 5,
+            "votingEnabled": true,
+            "resultsPublic": true
+          }
+        },
+        "score": 0,
+        "completedJudges": 1,
+        "categories": {
+          "33ff0b55-f8f9-4b65-8c12-e55d1d475ab5": 8,
+          "044f5781-1b64-4cb4-844d-a2d46470da40": 8,
+          "2688f5f2-5092-4fdd-b03f-10e7907372f4": 8,
+          "95547d3f-f82c-4d36-b3e4-d1992c41ff5e": 8
+        },
+        "prize": {
+          "name": "Grand Prize",
+          "value": "$2,500"
+        }
+      },
+      {
+        "rank": 2,
+        "team": {
+          "id": "a26f74ee-bed2-4537-a4c3-013055888128",
+          "name": "Flow Team caf1633cb0",
+          "members": [
+            {
+              "id": "a26f74ee-bed2-4537-a4c3-013055888128-member-1",
+              "name": "Flow Tester"
+            }
+          ]
+        },
+        "submission": {
+          "id": "a9e18e44-d68f-40bc-9c21-09f54396aec7",
+          "teamId": "a26f74ee-bed2-4537-a4c3-013055888128",
+          "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+          "title": "Flow Project caf1633cb0",
+          "tagline": "A real test project",
+          "summary": "Draft saved through persistent API storage.",
+          "tags": [
+            "test"
+          ],
+          "repositoryUrl": "",
+          "demoUrl": "",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-29T09:14:40.480Z",
+          "updatedAt": "2026-09-29T09:14:40.496Z",
+          "submittedAt": "2026-09-29T09:14:40.496Z",
+          "track": "Open source",
+          "team": {
+            "id": "a26f74ee-bed2-4537-a4c3-013055888128",
+            "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "name": "Flow Team caf1633cb0",
+            "memberIds": [
+              "84b0c0ec-97a7-4f02-ba98-f3d461ac099a"
+            ],
+            "createdBy": "84b0c0ec-97a7-4f02-ba98-f3d461ac099a",
+            "createdAt": "2026-09-29T09:14:40.465Z",
+            "members": [
+              {
+                "id": "84b0c0ec-97a7-4f02-ba98-f3d461ac099a",
+                "name": "Flow Tester"
+              }
+            ]
+          },
+          "event": {
+            "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "slug": "demo-event",
+            "title": "DOGFOOD Hackathon",
+            "submissionDeadline": "2026-10-11T18:00:00.000Z",
+            "teamCapacity": 5,
+            "votingEnabled": true,
+            "resultsPublic": true
+          }
+        },
+        "score": 0,
+        "completedJudges": 1,
+        "categories": {
+          "33ff0b55-f8f9-4b65-8c12-e55d1d475ab5": 8,
+          "044f5781-1b64-4cb4-844d-a2d46470da40": 8,
+          "2688f5f2-5092-4fdd-b03f-10e7907372f4": 8,
+          "95547d3f-f82c-4d36-b3e4-d1992c41ff5e": 8
+        },
+        "prize": {
+          "name": "Community Choice",
+          "value": "$1,000"
+        }
+      },
+      {
+        "rank": 3,
+        "team": {
+          "id": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1",
+          "name": "Flow Team 39575d0d27",
+          "members": [
+            {
+              "id": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1-member-1",
+              "name": "Flow Tester"
+            }
+          ]
+        },
+        "submission": {
+          "id": "12baee74-1c2e-4566-907e-b2887e37c666",
+          "teamId": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1",
+          "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+          "title": "Flow Project 39575d0d27",
+          "tagline": "A real test project",
+          "summary": "Draft saved through persistent API storage.",
+          "tags": [
+            "test"
+          ],
+          "repositoryUrl": "",
+          "demoUrl": "",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-29T09:15:17.612Z",
+          "updatedAt": "2026-09-29T09:15:17.625Z",
+          "submittedAt": "2026-09-29T09:15:17.625Z",
+          "track": "Open source",
+          "team": {
+            "id": "16db0b7a-b7a5-40b6-b83a-87a712b55ec1",
+            "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "name": "Flow Team 39575d0d27",
+            "memberIds": [
+              "e3e7f97a-89ed-49e8-ae40-2a31c9b8aac6"
+            ],
+            "createdBy": "e3e7f97a-89ed-49e8-ae40-2a31c9b8aac6",
+            "createdAt": "2026-09-29T09:15:17.596Z",
+            "members": [
+              {
+                "id": "e3e7f97a-89ed-49e8-ae40-2a31c9b8aac6",
+                "name": "Flow Tester"
+              }
+            ]
+          },
+          "event": {
+            "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "slug": "demo-event",
+            "title": "DOGFOOD Hackathon",
+            "submissionDeadline": "2026-10-11T18:00:00.000Z",
+            "teamCapacity": 5,
+            "votingEnabled": true,
+            "resultsPublic": true
+          }
+        },
+        "score": 0,
+        "completedJudges": 1,
+        "categories": {
+          "33ff0b55-f8f9-4b65-8c12-e55d1d475ab5": 8,
+          "044f5781-1b64-4cb4-844d-a2d46470da40": 8,
+          "2688f5f2-5092-4fdd-b03f-10e7907372f4": 8,
+          "95547d3f-f82c-4d36-b3e4-d1992c41ff5e": 8
+        },
+        "prize": null
+      },
+      {
+        "rank": 4,
+        "team": {
+          "id": "a6283f7b-f49e-4ffc-a138-f195c824ad42",
+          "name": "Good Neighbors",
+          "members": [
+            {
+              "id": "a6283f7b-f49e-4ffc-a138-f195c824ad42-member-1",
+              "name": "Morgan Chen"
+            }
+          ]
+        },
+        "submission": {
+          "id": "bbd11b74-52ea-4768-a993-f2b361e65564",
+          "teamId": "a6283f7b-f49e-4ffc-a138-f195c824ad42",
+          "trackId": "a4a1acfd-d4a0-4c14-b164-cef9c982b1bd",
+          "title": "OpenShelf",
+          "tagline": "Making neighborhood sharing feel effortless.",
+          "summary": "Making neighborhood sharing feel effortless. Built by Good Neighbors during DOGFOOD Hackathon.",
+          "tags": [
+            "TypeScript",
+            "Mutual aid",
+            "Maps"
+          ],
+          "repositoryUrl": "https://github.com/example/hackforge-demo",
+          "demoUrl": "https://example.com",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "updatedAt": "2026-09-29T09:10:12.358Z",
+          "submittedAt": "2026-09-29T09:10:12.358Z",
+          "track": "Open source",
+          "team": {
+            "id": "a6283f7b-f49e-4ffc-a138-f195c824ad42",
+            "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "name": "Good Neighbors",
+            "memberIds": [
+              "b2d7d95e-826a-4327-b294-2ae0b402d377"
+            ],
+            "createdBy": "b2d7d95e-826a-4327-b294-2ae0b402d377",
+            "createdAt": "2026-09-29T09:10:12.358Z",
+            "members": [
+              {
+                "id": "b2d7d95e-826a-4327-b294-2ae0b402d377",
+                "name": "Morgan Chen"
+              }
+            ]
+          },
+          "event": {
+            "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "slug": "demo-event",
+            "title": "DOGFOOD Hackathon",
+            "submissionDeadline": "2026-10-11T18:00:00.000Z",
+            "teamCapacity": 5,
+            "votingEnabled": true,
+            "resultsPublic": true
+          }
+        },
+        "score": null,
+        "completedJudges": 0,
+        "categories": {},
+        "prize": null
+      },
+      {
+        "rank": 5,
+        "team": {
+          "id": "26093218-3a4d-4c8c-812a-9e184fa3f100",
+          "name": "Blue Hour",
+          "members": [
+            {
+              "id": "26093218-3a4d-4c8c-812a-9e184fa3f100-member-1",
+              "name": "Sam Rivera"
+            }
+          ]
+        },
+        "submission": {
+          "id": "50529199-4a35-418f-9521-c7abd97c84da",
+          "teamId": "26093218-3a4d-4c8c-812a-9e184fa3f100",
+          "trackId": "a76fc097-fc4d-4387-a8ff-37e83d9e4ddf",
+          "title": "Tidepool",
+          "tagline": "Turn shoreline observations into action.",
+          "summary": "Turn shoreline observations into action. Built by Blue Hour during DOGFOOD Hackathon.",
+          "tags": [
+            "Python",
+            "Sensors",
+            "Open data"
+          ],
+          "repositoryUrl": "https://github.com/example/hackforge-demo",
+          "demoUrl": "https://example.com",
+          "status": "SUBMITTED",
+          "createdAt": "2026-09-29T09:10:12.358Z",
+          "updatedAt": "2026-09-29T09:10:12.358Z",
+          "submittedAt": "2026-09-29T09:10:12.358Z",
+          "track": "Climate",
+          "team": {
+            "id": "26093218-3a4d-4c8c-812a-9e184fa3f100",
+            "eventId": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "name": "Blue Hour",
+            "memberIds": [
+              "2bda863e-507f-4d4f-a9a9-fb130232871a"
+            ],
+            "createdBy": "2bda863e-507f-4d4f-a9a9-fb130232871a",
+            "createdAt": "2026-09-29T09:10:12.358Z",
+            "members": [
+              {
+                "id": "2bda863e-507f-4d4f-a9a9-fb130232871a",
+                "name": "Sam Rivera"
+              }
+            ]
+          },
+          "event": {
+            "id": "c88d2dac-de64-43ed-810c-bb35e7036ffb",
+            "slug": "demo-event",
+            "title": "DOGFOOD Hackathon",
+            "submissionDeadline": "2026-10-11T18:00:00.000Z",
+            "teamCapacity": 5,
+            "votingEnabled": true,
+            "resultsPublic": true
+          }
+        },
+        "score": null,
+        "completedJudges": 0,
+        "categories": {},
+        "prize": null
+      }
+    ]
+  },
+  "stats": {
+    "projects": 8,
+    "teams": 8,
+    "judges": 2,
+    "events": 2
+  }
+}

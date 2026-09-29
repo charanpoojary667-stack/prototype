@@ -37,3 +37,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Vercel demo data and API
+
+On Vercel, public event, gallery, project-detail, platform-stat, and published-results GET requests use the sanitized seeded snapshot in `backend/demo/public-seed.json` when `HACKFORGE_API_URL` is not set. This is a read-only public demo; login and changes require a reachable HackForge API. Set `HACKFORGE_API_URL` in Vercel to that API's origin or `/api` base path to enable the existing authenticated workflows. Local development and Docker continue to use the local API and SQLite/PostgreSQL configuration by default.
